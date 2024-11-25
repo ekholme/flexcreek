@@ -1,7 +1,21 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+)
 
 func main() {
-	fmt.Println("Hello from Flex Creek")
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("GET /", handleIndex)
+
+	fmt.Println("Running Flex Creek on port 8080")
+
+	http.ListenAndServe(":8080", mux)
+}
+
+// index handler
+func handleIndex(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello from Flex Creek"))
 }
