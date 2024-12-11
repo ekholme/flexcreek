@@ -2,20 +2,21 @@ package main
 
 import (
 	"fmt"
-	"net/http"
+	"log"
+
+	"github.com/ekholme/flexcreek/server"
 )
 
-func main() {
-	mux := http.NewServeMux()
+const addr = ":8080"
 
-	mux.HandleFunc("GET /", handleIndex)
+func main() {
+	s := server.NewServer(addr)
 
 	fmt.Println("Running Flex Creek on port 8080")
 
-	http.ListenAndServe(":8080", mux)
-}
+	err := s.Run()
 
-// index handler
-func handleIndex(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello from Flex Creek"))
+	if err != nil {
+		log.Fatalf("Error: %s", err)
+	}
 }
