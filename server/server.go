@@ -1,9 +1,12 @@
 package server
 
-import "net/http"
+import (
+	"encoding/json"
+	"net/http"
+)
 
-//define a server type
-//this will 'carry' all of our stuff around that we want
+// define a server type
+// this will 'carry' all of our stuff around that we want
 type Server struct {
 	Router *http.ServeMux
 	Srvr   *http.Server
@@ -15,7 +18,7 @@ type Server struct {
 	//include services used throughout
 }
 
-//constructor to create a new server object
+// constructor to create a new server object
 func NewServer(addr string) *Server {
 	return &Server{
 		Router: http.NewServeMux(),
@@ -24,12 +27,12 @@ func NewServer(addr string) *Server {
 	}
 }
 
-//function to register routes that are part of the application
+// function to register routes that are part of the application
 func (s *Server) registerRoutes() {
 	s.Router.HandleFunc("GET /", s.handleIndex)
 }
 
-//helper function to run the server
+// helper function to run the server
 func (s *Server) Run() error {
 	s.registerRoutes()
 
@@ -37,4 +40,11 @@ func (s *Server) Run() error {
 	s.Srvr.Addr = s.Addr
 
 	return s.Srvr.ListenAndServe()
+}
+
+// utility function to write JSON
+func writeJSON(w http.ResponseWriter, statusCode int, v any) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(v)
 }
