@@ -29,7 +29,16 @@ func NewServer(addr string) *Server {
 
 // function to register routes that are part of the application
 func (s *Server) registerRoutes() {
-	s.Router.HandleFunc("GET /", s.handleIndex)
+	s.Router.HandleFunc("GET /{$}", s.handleIndex)
+
+	//api routes ----------
+	s.Router.HandleFunc("GET /api/v1/movement/{id}", s.handleApiGetMovement)
+	s.Router.HandleFunc("GET /api/v1/movement/create", s.handleApiCreateMovement)
+
+	//html routes ---------
+	//movement routes
+	s.Router.HandleFunc("GET /movement/{id}", s.handleGetMovement)
+	s.Router.HandleFunc("GET /movement/create", s.handleCreateMovement)
 }
 
 // helper function to run the server
