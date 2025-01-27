@@ -1,16 +1,23 @@
 package flexcreek
 
+import "time"
+
 //a movement is a essentially an exercise, e.g. a kettlebell swing
 type Movement struct {
-	ID      int
-	Name    string
-	Muscles []string
+	ID      int      `json:"id"`
+	Name    string   `json:"name"`
+	Muscles []string `json:"muscles"`
+
+	//timestamps for creation and update
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type MovementService interface {
-	CreateMovement(name string, muscles []string) int //return the id number
-	GetMovementByID(id int) *Movement
-	GetMovementByName(name string) *Movement
-	DeleteMovement(id int)
+	CreateMovement(name string, muscles []string) (int, error) //return the id number
+	GetMovementByID(id int) (*Movement, error)
+	GetMovementByName(name string) (*Movement, error)
+	GetAllMovements() ([]*Movement, error)
+	DeleteMovement(id int) (int, error)
 	//TODO ADD OTHER METHODS
 }

@@ -1,7 +1,7 @@
 .PHONY: build-app run clean create-tables
 
 #defining db variables
-MIGRATION_SCRIPT := ./sql/migration.sql
+MIGRATION_SCRIPT := ./sqlite/migration.sql
 DATABASE := flexcreek.db
 
 build-app:
