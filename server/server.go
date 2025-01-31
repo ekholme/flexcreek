@@ -3,6 +3,8 @@ package server
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/ekholme/flexcreek"
 )
 
 // define a server type
@@ -14,16 +16,23 @@ type Server struct {
 	//listening address
 	Addr string
 
+	//services
+	MovementService flexcreek.MovementService
+
 	//todo -- add other stuff
 	//include services used throughout
+
 }
 
 // constructor to create a new server object
-func NewServer(addr string) *Server {
+func NewServer(addr string, ms flexcreek.MovementService) *Server {
 	return &Server{
 		Router: http.NewServeMux(),
 		Srvr:   &http.Server{},
 		Addr:   addr,
+
+		//services
+		MovementService: ms,
 	}
 }
 
@@ -33,7 +42,7 @@ func (s *Server) registerRoutes() {
 
 	//api routes ----------
 	s.Router.HandleFunc("GET /api/v1/movement/{id}", s.handleApiGetMovement)
-	s.Router.HandleFunc("GET /api/v1/movement/create", s.handleApiCreateMovement)
+	s.Router.HandleFunc("POST /api/v1/movement/create", s.handleApiCreateMovement)
 
 	//html routes ---------
 	//movement routes

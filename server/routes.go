@@ -1,9 +1,12 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/ekholme/flexcreek"
 )
 
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
@@ -14,8 +17,28 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 
 // api movement routes
 func (s *Server) handleApiCreateMovement(w http.ResponseWriter, r *http.Request) {
-	//TODO
-	writeJSON(w, http.StatusOK, "API route to create a movement")
+
+	var m *flexcreek.Movement
+
+	err := json.NewDecoder(r.Body).Decode(&m)
+
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, err)
+		return
+	}
+
+	mvID, err := s.MovementService.CreateMovement(m)
+
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	msg := make(map[string]int)
+
+	msg["new movement"] = mvID
+
+	writeJSON(w, http.StatusOK, msg)
 }
 
 func (s *Server) handleApiGetMovement(w http.ResponseWriter, r *http.Request) {

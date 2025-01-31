@@ -14,7 +14,7 @@ type Movement struct {
 }
 
 type MovementService interface {
-	CreateMovement(name string, muscles []string) (int, error) //return the id number
+	CreateMovement(m *Movement) (int, error) //return the id number
 	GetMovementByID(id int) (*Movement, error)
 	GetMovementByName(name string) (*Movement, error)
 	GetAllMovements() ([]*Movement, error)

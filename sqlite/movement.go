@@ -18,7 +18,7 @@ func NewMovementService(db *sql.DB) flexcreek.MovementService {
 }
 
 // methods ---------
-func (ms movementService) CreateMovement(name string, muscles []string) (int, error) {
+func (ms movementService) CreateMovement(m *flexcreek.Movement) (int, error) {
 	//insert movement
 	mvStmt, err := ms.db.Prepare("INSERT INTO movements (name) VALUES (?)")
 
@@ -26,7 +26,7 @@ func (ms movementService) CreateMovement(name string, muscles []string) (int, er
 		return 0, err
 	}
 
-	mvRes, err := mvStmt.Exec(name)
+	mvRes, err := mvStmt.Exec(m.Name)
 
 	if err != nil {
 		return 0, err
@@ -40,7 +40,7 @@ func (ms movementService) CreateMovement(name string, muscles []string) (int, er
 	}
 
 	//insert muscles
-	for _, m := range muscles {
+	for _, m := range m.Muscles {
 		msStmt, err := ms.db.Prepare("INSERT INTO muscles (name) VALUES (?)")
 
 		if err != nil {
