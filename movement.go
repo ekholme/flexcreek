@@ -21,5 +21,3 @@ type MovementService interface {
 	DeleteMovement(id int) (int, error)
 	//TODO ADD OTHER METHODS
 }
-
-//add muscleservice stuff here? Or should this get its own file?

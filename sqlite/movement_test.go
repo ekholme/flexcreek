@@ -1,8 +1,6 @@
 package sqlite_test
 
 import (
-	"database/sql"
-	"os"
 	"testing"
 
 	"github.com/ekholme/flexcreek"
@@ -12,31 +10,16 @@ import (
 )
 
 func TestMovementService_CreateMovement(t *testing.T) {
-	//use memory for testing
-	db, err := sql.Open("sqlite", ":memory:")
+	sqlFile := "migration.sql"
 
-	if err != nil {
-		t.Fatal(err)
-	}
+	db, cleanup := sqlite.CreateTestDb(t, sqlFile)
 
-	defer db.Close()
+	defer cleanup() //closes database after the test
 
-	//read in sql file to create tables for testing
-	schema, err := os.ReadFile("migration.sql")
-
-	if err != nil {
-		t.Fatalf("Error reading migration.sql file: %v", err)
-	}
-
-	//execute the .sql creation script
-	_, err = db.Exec(string(schema))
-
-	if err != nil {
-		t.Fatalf("Error creating tables %v", err)
-	}
+	mus := sqlite.NewMuscleService(db)
 
 	//create a new movementservice
-	ms := sqlite.NewMovementService(db)
+	ms := sqlite.NewMovementService(db, mus)
 
 	//just writing one for now, but eventually this will be more
 	testCase := struct {

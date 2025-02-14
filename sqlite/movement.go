@@ -7,13 +7,15 @@ import (
 )
 
 type movementService struct {
-	db *sql.DB
+	db  *sql.DB
+	mus flexcreek.MuscleService
 }
 
-func NewMovementService(db *sql.DB) flexcreek.MovementService {
+func NewMovementService(db *sql.DB, mus flexcreek.MuscleService) flexcreek.MovementService {
 
 	return &movementService{
-		db: db,
+		db:  db,
+		mus: mus,
 	}
 }
 

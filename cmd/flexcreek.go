@@ -22,7 +22,9 @@ func main() {
 		log.Fatalf("Error: %s", err)
 	}
 
-	ms := sqlite.NewMovementService(db)
+	mus := sqlite.NewMuscleService(db)
+
+	ms := sqlite.NewMovementService(db, mus)
 
 	s := server.NewServer(addr, ms)
 
