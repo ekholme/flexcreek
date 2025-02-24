@@ -21,7 +21,7 @@ func TestMovementService_CreateMovement(t *testing.T) {
 	//create a new movementservice
 	ms := sqlite.NewMovementService(db, mus)
 
-	//just writing one for now, but eventually this will be more
+	//clean this up later -- it's a bit clunky to define the test case like this here
 	testCase := struct {
 		name        string
 		movement    flexcreek.Movement
@@ -30,8 +30,12 @@ func TestMovementService_CreateMovement(t *testing.T) {
 	}{
 		name: "Valid Movement Creation",
 		movement: flexcreek.Movement{
-			Name:    "Squat",
-			Muscles: []string{"quads", "hamstrings", "glutes"},
+			Name: "Squat",
+			Muscles: []*flexcreek.Muscle{
+				{Name: "Hamstring"},
+				{Name: "Quads"},
+				{Name: "Glutes"},
+			},
 		},
 		expectedID:  1,
 		expectedErr: "",

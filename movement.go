@@ -4,9 +4,9 @@ import "time"
 
 //a movement is a essentially an exercise, e.g. a kettlebell swing
 type Movement struct {
-	ID      int      `json:"id"`
-	Name    string   `json:"name"`
-	Muscles []string `json:"muscles"`
+	ID      int       `json:"id"`
+	Name    string    `json:"name"`
+	Muscles []*Muscle `json:"muscles"`
 
 	//timestamps for creation and update
 	CreatedAt time.Time `json:"createdAt"`
