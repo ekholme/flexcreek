@@ -41,7 +41,8 @@ func (s *Server) handleApiCreateMovement(w http.ResponseWriter, r *http.Request)
 	writeJSON(w, http.StatusOK, msg)
 }
 
-func (s *Server) handleApiGetMovement(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleApiGetMovementByID(w http.ResponseWriter, r *http.Request) {
+	//todo -- write a validator here
 	id, err := strconv.Atoi(r.PathValue("id"))
 
 	if err != nil || id < 1 {
@@ -49,11 +50,27 @@ func (s *Server) handleApiGetMovement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	msg := make(map[string]int)
+	m, err := s.MovementService.GetMovementByID(id)
 
-	msg["id"] = id
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, err)
+		return
+	}
 
-	writeJSON(w, http.StatusOK, msg)
+	writeJSON(w, http.StatusOK, m)
+}
+
+func (s *Server) handleApiGetMovementByName(w http.ResponseWriter, r *http.Request) {
+	nm := r.PathValue("name")
+
+	m, err := s.MovementService.GetMovementByName(nm)
+
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, m)
 }
 
 // html movement routes

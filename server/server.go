@@ -41,7 +41,11 @@ func (s *Server) registerRoutes() {
 	s.Router.HandleFunc("GET /{$}", s.handleIndex)
 
 	//api routes ----------
-	s.Router.HandleFunc("GET /api/v1/movement/{id}", s.handleApiGetMovement)
+	//get routes
+	s.Router.HandleFunc("GET /api/v1/movement/id/{id}", s.handleApiGetMovementByID)
+	s.Router.HandleFunc("GET /api/v1/movement/name/{name}", s.handleApiGetMovementByName) // hasn't been implemented yet
+
+	//other routes
 	s.Router.HandleFunc("POST /api/v1/movement/create", s.handleApiCreateMovement)
 
 	//html routes ---------

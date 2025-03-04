@@ -76,8 +76,81 @@ func (ms movementService) GetMovementByID(id int) (*flexcreek.Movement, error) {
 		return nil, err
 	}
 
-	var muscles []*flexcreek.Muscle
+	muscles, err := ms.GetMovementMuscles(movement)
 
+	if err != nil {
+		return nil, err
+	}
+
+	movement.Muscles = muscles
+
+	return movement, nil
+}
+
+func (ms movementService) GetMovementByName(name string) (*flexcreek.Movement, error) {
+	movement := &flexcreek.Movement{}
+
+	err := ms.db.QueryRow("SELECT * FROM movements WHERE name = ?", name).Scan(&movement.ID, &movement.Name, &movement.CreatedAt, &movement.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	muscles, err := ms.GetMovementMuscles(movement)
+
+	if err != nil {
+		return nil, err
+	}
+
+	movement.Muscles = muscles
+
+	return movement, nil
+}
+
+func (ms movementService) GetAllMovements() ([]*flexcreek.Movement, error) {
+	var movements []*flexcreek.Movement
+
+	qry := "SELECT * FROM movements"
+
+	rows, err := ms.db.Query(qry)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		movement := &flexcreek.Movement{}
+
+		err = rows.Scan(&movement.ID, &movement.Name, &movement.CreatedAt, &movement.UpdatedAt)
+
+		if err != nil {
+			return nil, err
+		}
+
+		muscles, err := ms.GetMovementMuscles(movement)
+
+		if err != nil {
+			return nil, err
+		}
+
+		movement.Muscles = muscles
+
+		movements = append(movements, movement)
+	}
+
+	return movements, nil
+}
+
+func (ms movementService) DeleteMovement(id int) (int, error) {
+	//TODO
+	return 0, nil
+}
+
+// utility to get all muscles associated with a movement
+// this isn't currently in the MovementService interface, but I think that's ok for now?
+func (ms movementService) GetMovementMuscles(m *flexcreek.Movement) ([]*flexcreek.Muscle, error) {
 	qry := `
 		SELECT mu.muscle_id,
 		mu.name,
@@ -91,13 +164,15 @@ func (ms movementService) GetMovementByID(id int) (*flexcreek.Movement, error) {
 		) mm
 		ON mu.muscle_id = mm.muscle_id
 	`
-	rows, err := ms.db.Query(qry, id)
+	rows, err := ms.db.Query(qry, m.ID)
 
 	if err != nil {
 		return nil, err
 	}
 
 	defer rows.Close()
+
+	var muscles []*flexcreek.Muscle
 
 	for rows.Next() {
 		muscle := &flexcreek.Muscle{}
@@ -111,22 +186,6 @@ func (ms movementService) GetMovementByID(id int) (*flexcreek.Movement, error) {
 		muscles = append(muscles, muscle)
 	}
 
-	movement.Muscles = muscles
+	return muscles, nil
 
-	return movement, nil
-}
-
-func (ms movementService) GetMovementByName(name string) (*flexcreek.Movement, error) {
-	//TODO
-	return nil, nil
-}
-
-func (ms movementService) GetAllMovements() ([]*flexcreek.Movement, error) {
-	//TODO
-	return nil, nil
-}
-
-func (ms movementService) DeleteMovement(id int) (int, error) {
-	//TODO
-	return 0, nil
 }
