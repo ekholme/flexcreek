@@ -3,11 +3,19 @@ package server
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/ekholme/flexcreek"
 )
 
 type Server struct {
 	Router *http.ServeMux
 	Srvr   *http.Server
+
+	//Services
+	MovementService         flexcreek.MovementService
+	MovementInstanceService flexcreek.MovementInstanceService
+	WorkoutService          flexcreek.WorkoutService
+	UserService             flexcreek.UserService
 }
 
 func NewServer(addr string) *Server {
