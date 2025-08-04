@@ -5,14 +5,25 @@ import (
 	"time"
 )
 
+// MovementType defines the category of a movement.
+// This helps determine what kind of metrics are tracked for it.
+type MovementType string
+
+const (
+	StrengthMovement MovementType = "strength"
+	CardioMovement   MovementType = "cardio"
+	AmrapMovement    MovementType = "amrap" // As Many Rounds As Possible
+	EmomMovement     MovementType = "emom"  // Every Minute On the Minute
+	// Add other types as needed, e.g., "flexibility", "tabata"
+)
+
 type Movement struct {
-	ID           int       `json:"id"`
-	Name         string    `json:"name"`
-	MovementType string    `json:"movementType"` //eg 'kettlebell', 'barbell', 'cardio', etc. Not sure if I actually need this
-	Description  string    `json:"description"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
-	//potentially add other fields?
+	ID           int          `json:"id"`
+	Name         string       `json:"name"`
+	MovementType MovementType `json:"movementType"` // e.g., 'strength', 'cardio'
+	Description  string       `json:"description,omitempty"`
+	CreatedAt    time.Time    `json:"createdAt"`
+	UpdatedAt    time.Time    `json:"updatedAt"`
 }
 
 type MovementService interface {

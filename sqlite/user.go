@@ -143,8 +143,7 @@ func (us *userService) UpdateUser(ctx context.Context, user *flexcreek.User) err
 			first_name = ?,
 			last_name = ?,
 			email = ?,
-			hashed_password = ?,
-			updated_at = CURRENT_TIMESTAMP
+			hashed_password = ?
 		WHERE id = ?
 	`
 	res, err := us.db.ExecContext(ctx, qry, user.FirstName, user.LastName, user.Email, user.HashedPw, user.ID)
