@@ -47,26 +47,134 @@ func (ms *movementService) CreateMovement(ctx context.Context, m *flexcreek.Move
 }
 
 func (ms *movementService) GetMovementByID(ctx context.Context, id int) (*flexcreek.Movement, error) {
-	//todo
-	return nil, nil
+	mv := &flexcreek.Movement{}
+
+	qry := `
+		SELECT id,
+		name,
+		movement_type,
+		movement_description,
+		created_at,
+		updated_at
+		FROM movements
+		WHERE id = ?
+	`
+
+	err := ms.db.QueryRowContext(ctx, qry, id).Scan(&mv.ID, &mv.Name, &mv.MovementType, &mv.Description, &mv.CreatedAt, &mv.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mv, nil
 }
 
 func (ms *movementService) GetMovementByName(ctx context.Context, name string) (*flexcreek.Movement, error) {
-	//todo
-	return nil, nil
+	mv := &flexcreek.Movement{}
+
+	qry := `
+		SELECT id,
+		name,
+		movement_type,
+		movement_description,
+		created_at,
+		updated_at
+		FROM movements
+		WHERE name = ?
+	`
+
+	err := ms.db.QueryRowContext(ctx, qry, name).Scan(&mv.ID, &mv.Name, &mv.MovementType, &mv.Description, &mv.CreatedAt, &mv.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mv, nil
 }
 
 func (ms *movementService) GetAllMovements(ctx context.Context) ([]*flexcreek.Movement, error) {
-	//todo
-	return nil, nil
+	qry := `
+		SELECT id,
+		name,
+		movement_type,
+		movement_description,
+		created_at,
+		updated_at
+		FROM movements
+	`
+
+	rows, err := ms.db.QueryContext(ctx, qry)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	mvs := []*flexcreek.Movement{}
+
+	for rows.Next() {
+		mv := &flexcreek.Movement{}
+
+		err = rows.Scan(&mv.ID, &mv.Name, &mv.MovementType, &mv.Description, &mv.CreatedAt, &mv.UpdatedAt)
+
+		if err != nil {
+			return nil, err
+		}
+
+		mvs = append(mvs, mv)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return mvs, nil
 }
 
 func (ms *movementService) UpdateMovement(ctx context.Context, m *flexcreek.Movement) error {
-	//todo
+	qry := `
+		UPDATE movements
+		SET
+			name = ?,
+			movement_type = ?,
+			movement_description = ?
+		WHERE id = ?
+	`
+
+	res, err := ms.db.ExecContext(ctx, qry, m.Name, m.MovementType, m.Description, m.ID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
 	return nil
 }
 
 func (ms *movementService) DeleteMovement(ctx context.Context, id int) error {
-	//todo
+	qry := `DELETE FROM movements WHERE id = ?`
+
+	res, err := ms.db.ExecContext(ctx, qry, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
 	return nil
 }

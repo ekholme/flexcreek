@@ -1,6 +1,9 @@
 package flexcreek
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 // Set represents a single set of a strength-based movement,
 // detailing the number of repetitions and the weight used.
@@ -40,11 +43,11 @@ type EmomLog struct {
 // For example, 3 sets of 5 reps of Squats, or a 30-minute run.
 // It uses composition to hold specific metrics for different types of activities.
 type MovementInstance struct {
-	ID         int    `json:"id"`
-	WorkoutID  int    `json:"workoutId"`
-	MovementID int    `json:"movementId"`
-	Notes      string `json:"notes,omitempty"`
-	RPE        *int   `json:"rpe,omitempty"` // Pointer to allow for null value (optional field). 1-10 scale.
+	ID        int       `json:"id"`
+	WorkoutID int       `json:"workoutId"`
+	Movement  *Movement `json:"movement"`
+	Notes     string    `json:"notes,omitempty"`
+	RPE       *int      `json:"rpe,omitempty"` // Pointer to allow for null value (optional field). 1-10 scale.
 
 	// Depending on the type of movement, one of the following will be populated.
 	Strength *StrengthLog `json:"strength,omitempty"`
@@ -57,5 +60,10 @@ type MovementInstance struct {
 }
 
 type MovementInstanceService interface {
-	//TODO
+	CreateMovementInstance(ctx context.Context, mi *MovementInstance) (int, error)
+	GetMovementInstanceByID(ctx context.Context, id int) (*MovementInstance, error)
+	GetMovementInstanceByName(ctx context.Context, name string) (*MovementInstance, error)
+	GetAllMovementInstancesByUser(ctx context.Context, user *User) ([]*MovementInstance, error)
+	UpdateMovementInstance(ctx context.Context, mi *MovementInstance) error
+	DeleteMovementInstance(ctx context.Context, id int) error
 }
