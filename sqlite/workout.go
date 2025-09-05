@@ -62,13 +62,100 @@ func (s *workoutService) CreateWorkout(ctx context.Context, w *flexcreek.Workout
 }
 
 func (s *workoutService) GetWorkoutByID(ctx context.Context, id int) (*flexcreek.Workout, error) {
-	//todo
-	return nil, nil
+
+	w := &flexcreek.Workout{}
+
+	qry := `
+		SELECT w.id,
+		w.user_id,
+		w.workout_date,
+		w.notes,
+		w.duration_seconds,
+		w.created_at,
+		w.updated_at
+		FROM workouts w
+		WHERE w.id = ?
+	`
+
+	err := s.db.QueryRowContext(ctx, qry, id).Scan(
+		&w.ID,
+		&w.UserID,
+		&w.Date,
+		&w.Notes,
+		&w.Duration,
+		&w.CreatedAt,
+		&w.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	ms := &movementInstanceService{db: s.db}
+
+	mis, err := ms.GetMovementInstancesByWorkoutID(ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	w.MovementInstances = mis
+
+	return w, nil
 }
 
 func (s *workoutService) GetAllWorkoutsByUser(ctx context.Context, user *flexcreek.User) ([]*flexcreek.Workout, error) {
-	//todo
-	return nil, nil
+	workouts := []*flexcreek.Workout{}
+
+	ms := &movementInstanceService{db: s.db}
+
+	qry := `
+		SELECT w.id,
+		w.user_id,
+		w.workout_date,
+		w.notes,
+		w.duration_seconds,
+		w.created_at,
+		w.updated_at
+		FROM workouts w
+		WHERE w.user_id = ?
+	`
+
+	rows, err := s.db.QueryContext(ctx, qry, user.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		w := &flexcreek.Workout{}
+
+		if err := rows.Scan(
+			&w.ID,
+			&w.UserID,
+			&w.Date,
+			&w.Notes,
+			&w.Duration,
+			&w.CreatedAt,
+			&w.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		mis, err := ms.GetMovementInstancesByWorkoutID(ctx, w.ID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		w.MovementInstances = mis
+
+		workouts = append(workouts, w)
+	}
+
+	return workouts, nil
 }
 
 func (s *workoutService) GetWorkoutByDate(ctx context.Context, user *flexcreek.User, d time.Time) (*flexcreek.Workout, error) {

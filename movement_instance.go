@@ -63,6 +63,7 @@ type MovementInstanceService interface {
 	CreateMovementInstance(ctx context.Context, mi *MovementInstance) (int, error)
 	GetMovementInstanceByID(ctx context.Context, id int) (*MovementInstance, error)
 	GetMovementInstanceByName(ctx context.Context, name string) (*MovementInstance, error)
+	GetMovementInstancesByWorkoutID(ctx context.Context, workoutID int) ([]*MovementInstance, error)
 	GetAllMovementInstancesByUser(ctx context.Context, user *User) ([]*MovementInstance, error)
 	UpdateMovementInstance(ctx context.Context, mi *MovementInstance) error
 	DeleteMovementInstance(ctx context.Context, id int) error
