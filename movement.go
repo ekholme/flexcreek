@@ -31,6 +31,7 @@ type MovementService interface {
 	GetMovementByID(ctx context.Context, id int) (*Movement, error)
 	GetMovementByName(ctx context.Context, name string) (*Movement, error)
 	GetAllMovements(ctx context.Context) ([]*Movement, error)
+	GetAllMovementsByType(ctx context.Context, movementType MovementType) ([]*Movement, error)
 	UpdateMovement(ctx context.Context, m *Movement) error
 	DeleteMovement(ctx context.Context, id int) error
 }

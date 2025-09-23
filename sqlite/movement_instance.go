@@ -98,53 +98,104 @@ func (s *movementInstanceService) GetMovementInstanceByID(ctx context.Context, i
 	return mi, nil
 }
 
-// GetMovementInstanceByName finds the most recent movement instance
-// associated with a movement of a given name.
-// Note: The concept of "getting a single instance by name" is ambiguous.
-// This implementation returns the most recently created instance for the given movement name.
-func (s *movementInstanceService) GetMovementInstanceByName(ctx context.Context, name string) (*flexcreek.MovementInstance, error) {
-	mi := &flexcreek.MovementInstance{
-		Movement: &flexcreek.Movement{},
-	}
-	var logData sql.NullString
-
+func (s *movementInstanceService) GetAllMovementInstancesByWorkoutID(ctx context.Context, workoutID int) ([]*flexcreek.MovementInstance, error) {
 	qry := `
 		SELECT
-			mi.id, mi.workout_id, mi.notes, mi.rpe,
-			mi.log_data, mi.created_at, mi.updated_at,
-			m.id, m.name, m.movement_type, m.description, m.created_at, m.updated_at
+		mi.id, mi.workout_id, mi.notes, mi.rpe, mi.log_data, mi.created_at, mi.updated_at, m.id, m.name, m.movement_type, m.description, m.created_at, m.updated_at
 		FROM movement_instances mi
 		JOIN movements m ON mi.movement_id = m.id
-		WHERE m.name = ?
-		ORDER BY mi.created_at DESC
-		LIMIT 1`
+		WHERE mi.workout_id = ?	
+	`
+	rows, err := s.db.QueryContext(ctx, qry, workoutID)
 
-	err := s.db.QueryRowContext(ctx, qry, name).Scan(
-		&mi.ID,
-		&mi.WorkoutID,
-		&mi.Notes,
-		&mi.RPE,
-		&logData,
-		&mi.CreatedAt, &mi.UpdatedAt,
-		&mi.Movement.ID,
-		&mi.Movement.Name,
-		&mi.Movement.MovementType,
-		&mi.Movement.Description,
-		&mi.Movement.CreatedAt,
-		&mi.Movement.UpdatedAt,
-	)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := unmarshalLogData(mi, logData, string(mi.Movement.MovementType)); err != nil {
-		return nil, err
+	defer rows.Close()
+
+	instances := []*flexcreek.MovementInstance{}
+
+	for rows.Next() {
+		mi := &flexcreek.MovementInstance{
+			Movement: &flexcreek.Movement{},
+		}
+		var logData sql.NullString
+
+		if err := rows.Scan(
+			&mi.ID, &mi.WorkoutID, &mi.Notes, &mi.RPE,
+			&logData, &mi.CreatedAt, &mi.UpdatedAt,
+			&mi.Movement.ID,
+			&mi.Movement.Name,
+			&mi.Movement.MovementType,
+			&mi.Movement.Description,
+			&mi.Movement.CreatedAt,
+			&mi.Movement.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		if err = unmarshalLogData(mi, logData, string(mi.Movement.MovementType)); err != nil {
+			return nil, err
+		}
+
+		instances = append(instances, mi)
+
 	}
 
-	return mi, nil
+	return instances, rows.Err()
 }
 
-func (s *movementInstanceService) GetAllMovementInstancesByUser(ctx context.Context, user *flexcreek.User) ([]*flexcreek.MovementInstance, error) {
+func (s *movementInstanceService) GetAllMovementInstancesForMovement(ctx context.Context, userID int, movementID int) ([]*flexcreek.MovementInstance, error) {
+	qry := `
+		SELECT
+			mi.id, mi.workout_id, mi.notes, mi.rpe, mi.log_data,
+			mi.created_at, mi.updated_at, m.id, m.name, m.movement_type, m.description, m.created_at, m.updated_at
+		FROM movement_instances mi
+		JOIN workouts w ON mi.workout_id = w.id
+		JOIN movements m ON mi.movement_id = m.id
+		WHERE m.id = ?
+		  AND w.user_id = ?
+		ORDER BY mi.created_at DESC
+	`
+	rows, err := s.db.QueryContext(ctx, qry, movementID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	instances := []*flexcreek.MovementInstance{}
+	for rows.Next() {
+		mi := &flexcreek.MovementInstance{
+			Movement: &flexcreek.Movement{},
+		}
+		var logData sql.NullString
+
+		if err := rows.Scan(
+			&mi.ID, &mi.WorkoutID, &mi.Notes, &mi.RPE,
+			&logData, &mi.CreatedAt, &mi.UpdatedAt,
+			&mi.Movement.ID,
+			&mi.Movement.Name,
+			&mi.Movement.MovementType,
+			&mi.Movement.Description,
+			&mi.Movement.CreatedAt,
+			&mi.Movement.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		if err := unmarshalLogData(mi, logData, string(mi.Movement.MovementType)); err != nil {
+			return nil, err
+		}
+
+		instances = append(instances, mi)
+	}
+
+	return instances, rows.Err()
+
+}
+
+func (s *movementInstanceService) GetAllMovementInstancesByUser(ctx context.Context, userID int) ([]*flexcreek.MovementInstance, error) {
 	qry := `
 		SELECT
 			mi.id, mi.workout_id, mi.notes, mi.rpe, mi.log_data,
@@ -154,7 +205,7 @@ func (s *movementInstanceService) GetAllMovementInstancesByUser(ctx context.Cont
 		JOIN movements m ON mi.movement_id = m.id
 		WHERE w.user_id = ?`
 
-	rows, err := s.db.QueryContext(ctx, qry, user.ID)
+	rows, err := s.db.QueryContext(ctx, qry, userID)
 	if err != nil {
 		return nil, err
 	}

@@ -62,8 +62,9 @@ type MovementInstance struct {
 type MovementInstanceService interface {
 	CreateMovementInstance(ctx context.Context, mi *MovementInstance) (int, error)
 	GetMovementInstanceByID(ctx context.Context, id int) (*MovementInstance, error)
-	GetMovementInstanceByName(ctx context.Context, name string) (*MovementInstance, error)
-	GetAllMovementInstancesByUser(ctx context.Context, user *User) ([]*MovementInstance, error)
+	GetAllMovementInstancesByWorkoutID(ctx context.Context, workoutID int) ([]*MovementInstance, error)
+	GetAllMovementInstancesForMovement(ctx context.Context, userID int, movementID int) ([]*MovementInstance, error)
+	GetAllMovementInstancesByUser(ctx context.Context, userID int) ([]*MovementInstance, error)
 	UpdateMovementInstance(ctx context.Context, mi *MovementInstance) error
 	DeleteMovementInstance(ctx context.Context, id int) error
 }

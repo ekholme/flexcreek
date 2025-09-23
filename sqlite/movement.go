@@ -131,6 +131,46 @@ func (ms *movementService) GetAllMovements(ctx context.Context) ([]*flexcreek.Mo
 	return mvs, nil
 }
 
+func (ms *movementService) GetAllMovementsByType(ctx context.Context, movementType flexcreek.MovementType) ([]*flexcreek.Movement, error) {
+	qry := `
+		SELECT id,
+		name,
+		movement_type,
+		movement_description,
+		created_at,
+		updated_at
+		FROM movements
+		WHERE movement_type = ?
+	`
+
+	rows, err := ms.db.QueryContext(ctx, qry, movementType)
+
+	if err != nil {
+		return nil, err
+	}
+
+	mvs := []*flexcreek.Movement{}
+
+	for rows.Next() {
+		mv := &flexcreek.Movement{}
+
+		err = rows.Scan(&mv.ID, &mv.Name, &mv.MovementType, &mv.Description, &mv.CreatedAt, &mv.UpdatedAt)
+
+		if err != nil {
+			return nil, err
+		}
+
+		mvs = append(mvs, mv)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return mvs, nil
+
+}
+
 func (ms *movementService) UpdateMovement(ctx context.Context, m *flexcreek.Movement) error {
 	qry := `
 		UPDATE movements
