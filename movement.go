@@ -21,7 +21,6 @@ type Movement struct {
 	ID           int          `json:"id"`
 	Name         string       `json:"name"`
 	MovementType MovementType `json:"movementType"` // e.g., 'strength', 'cardio'
-	Description  string       `json:"description,omitempty"`
 	CreatedAt    time.Time    `json:"createdAt"`
 	UpdatedAt    time.Time    `json:"updatedAt"`
 }

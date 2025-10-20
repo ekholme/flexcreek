@@ -1,4 +1,6 @@
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE
+IF NOT EXISTS users
+(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
@@ -8,28 +10,35 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS movements (
+CREATE TABLE
+IF NOT EXISTS movements
+(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     movement_type TEXT,
-    movement_description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS workouts (
+CREATE TABLE
+IF NOT EXISTS workouts
+(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
-    name TEXT,
     workout_date DATE NOT NULL DEFAULT CURRENT_DATE,
     notes TEXT,
     duration_seconds INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    FOREIGN KEY
+(user_id) REFERENCES users
+(id) ON
+DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS movement_instances (
+CREATE TABLE
+IF NOT EXISTS movement_instances
+(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     workout_id INTEGER NOT NULL,
     movement_id INTEGER NOT NULL,
@@ -38,8 +47,15 @@ CREATE TABLE IF NOT EXISTS movement_instances (
     log_data TEXT, -- This will store our JSON blob
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (workout_id) REFERENCES workouts(id),
-    FOREIGN KEY (movement_id) REFERENCES movements(id)
+    FOREIGN KEY
+(workout_id) REFERENCES workouts
+(id)
+    ON
+DELETE CASCADE,
+    FOREIGN KEY
+(movement_id)
+REFERENCES movements
+(id)
 );
 
 
@@ -60,29 +76,37 @@ CREATE INDEX idx_workouts_workout_date ON workouts (workout_date);
 -- This ensures the timestamp is always current on any update, without
 -- relying on the application layer to set it.
 
-CREATE TRIGGER IF NOT EXISTS trigger_users_updated_at
-AFTER UPDATE ON users
+CREATE TRIGGER
+IF NOT EXISTS trigger_users_updated_at
+AFTER
+UPDATE ON users
 FOR EACH ROW
 BEGIN
     UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
 END;
 
-CREATE TRIGGER IF NOT EXISTS trigger_movements_updated_at
-AFTER UPDATE ON movements
+CREATE TRIGGER
+IF NOT EXISTS trigger_movements_updated_at
+AFTER
+UPDATE ON movements
 FOR EACH ROW
 BEGIN
     UPDATE movements SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
 END;
 
-CREATE TRIGGER IF NOT EXISTS trigger_workouts_updated_at
-AFTER UPDATE ON workouts
+CREATE TRIGGER
+IF NOT EXISTS trigger_workouts_updated_at
+AFTER
+UPDATE ON workouts
 FOR EACH ROW
 BEGIN
     UPDATE workouts SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
 END;
 
-CREATE TRIGGER IF NOT EXISTS trigger_movement_instances_updated_at
-AFTER UPDATE ON movement_instances
+CREATE TRIGGER
+IF NOT EXISTS trigger_movement_instances_updated_at
+AFTER
+UPDATE ON movement_instances
 FOR EACH ROW
 BEGIN
     UPDATE movement_instances SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;

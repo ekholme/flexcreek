@@ -37,6 +37,13 @@ func createSchema(t *testing.T, db *sql.DB) {
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);
+
+	CREATE TRIGGER IF NOT EXISTS trigger_users_updated_at
+	AFTER UPDATE ON users
+	FOR EACH ROW
+	BEGIN
+		UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
+	END;
 	`
 	if _, err := db.Exec(schema); err != nil {
 		t.Fatalf("failed to create schema: %v", err)

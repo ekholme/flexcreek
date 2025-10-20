@@ -21,18 +21,10 @@ func NewMovementService(db *sql.DB) flexcreek.MovementService {
 
 func (ms *movementService) CreateMovement(ctx context.Context, m *flexcreek.Movement) (int, error) {
 	qry := `
-		INSERT INTO movements (name, movement_type, movement_description) VALUES (?, ?, ?)	
+		INSERT INTO movements (name, movement_type) VALUES (?, ?)	
 	`
 
-	stmt, err := ms.db.PrepareContext(ctx, qry)
-
-	if err != nil {
-		return 0, err
-	}
-	defer stmt.Close()
-
-	res, err := stmt.ExecContext(ctx, m.Name, m.MovementType, m.Description)
-
+	res, err := ms.db.ExecContext(ctx, qry, m.Name, m.MovementType)
 	if err != nil {
 		return 0, err
 	}
@@ -53,14 +45,13 @@ func (ms *movementService) GetMovementByID(ctx context.Context, id int) (*flexcr
 		SELECT id,
 		name,
 		movement_type,
-		movement_description,
 		created_at,
 		updated_at
 		FROM movements
 		WHERE id = ?
 	`
 
-	err := ms.db.QueryRowContext(ctx, qry, id).Scan(&mv.ID, &mv.Name, &mv.MovementType, &mv.Description, &mv.CreatedAt, &mv.UpdatedAt)
+	err := ms.db.QueryRowContext(ctx, qry, id).Scan(&mv.ID, &mv.Name, &mv.MovementType, &mv.CreatedAt, &mv.UpdatedAt)
 
 	if err != nil {
 		return nil, err
@@ -76,14 +67,13 @@ func (ms *movementService) GetMovementByName(ctx context.Context, name string) (
 		SELECT id,
 		name,
 		movement_type,
-		movement_description,
 		created_at,
 		updated_at
 		FROM movements
 		WHERE name = ?
 	`
 
-	err := ms.db.QueryRowContext(ctx, qry, name).Scan(&mv.ID, &mv.Name, &mv.MovementType, &mv.Description, &mv.CreatedAt, &mv.UpdatedAt)
+	err := ms.db.QueryRowContext(ctx, qry, name).Scan(&mv.ID, &mv.Name, &mv.MovementType, &mv.CreatedAt, &mv.UpdatedAt)
 
 	if err != nil {
 		return nil, err
@@ -97,7 +87,6 @@ func (ms *movementService) GetAllMovements(ctx context.Context) ([]*flexcreek.Mo
 		SELECT id,
 		name,
 		movement_type,
-		movement_description,
 		created_at,
 		updated_at
 		FROM movements
@@ -115,7 +104,7 @@ func (ms *movementService) GetAllMovements(ctx context.Context) ([]*flexcreek.Mo
 	for rows.Next() {
 		mv := &flexcreek.Movement{}
 
-		err = rows.Scan(&mv.ID, &mv.Name, &mv.MovementType, &mv.Description, &mv.CreatedAt, &mv.UpdatedAt)
+		err = rows.Scan(&mv.ID, &mv.Name, &mv.MovementType, &mv.CreatedAt, &mv.UpdatedAt)
 
 		if err != nil {
 			return nil, err
@@ -136,7 +125,6 @@ func (ms *movementService) GetAllMovementsByType(ctx context.Context, movementTy
 		SELECT id,
 		name,
 		movement_type,
-		movement_description,
 		created_at,
 		updated_at
 		FROM movements
@@ -154,7 +142,7 @@ func (ms *movementService) GetAllMovementsByType(ctx context.Context, movementTy
 	for rows.Next() {
 		mv := &flexcreek.Movement{}
 
-		err = rows.Scan(&mv.ID, &mv.Name, &mv.MovementType, &mv.Description, &mv.CreatedAt, &mv.UpdatedAt)
+		err = rows.Scan(&mv.ID, &mv.Name, &mv.MovementType, &mv.CreatedAt, &mv.UpdatedAt)
 
 		if err != nil {
 			return nil, err
@@ -176,12 +164,11 @@ func (ms *movementService) UpdateMovement(ctx context.Context, m *flexcreek.Move
 		UPDATE movements
 		SET
 			name = ?,
-			movement_type = ?,
-			movement_description = ?
+			movement_type = ?
 		WHERE id = ?
 	`
 
-	res, err := ms.db.ExecContext(ctx, qry, m.Name, m.MovementType, m.Description, m.ID)
+	res, err := ms.db.ExecContext(ctx, qry, m.Name, m.MovementType, m.ID)
 	if err != nil {
 		return err
 	}

@@ -25,14 +25,7 @@ func (us *userService) CreateUser(ctx context.Context, user *flexcreek.User) (in
 		VALUES (?, ?, ?, ?)	
 	`
 
-	stmt, err := us.db.PrepareContext(ctx, qry)
-	if err != nil {
-		return 0, err
-	}
-	defer stmt.Close()
-
-	res, err := stmt.ExecContext(ctx, user.FirstName, user.LastName, user.Email, user.HashedPw)
-
+	res, err := us.db.ExecContext(ctx, qry, user.FirstName, user.LastName, user.Email, user.HashedPw)
 	if err != nil {
 		return 0, err
 	}

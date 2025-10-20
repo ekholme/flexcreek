@@ -67,7 +67,7 @@ func (s *movementInstanceService) GetMovementInstanceByID(ctx context.Context, i
 		SELECT
 			mi.id, mi.workout_id, mi.notes, mi.rpe,
 			mi.log_data, mi.created_at, mi.updated_at,
-			m.id, m.name, m.movement_type, m.description, m.created_at, m.updated_at
+			m.id, m.name, m.movement_type, m.created_at, m.updated_at
 		FROM movement_instances mi
 		JOIN movements m ON mi.movement_id = m.id
 		WHERE mi.id = ?`
@@ -83,7 +83,6 @@ func (s *movementInstanceService) GetMovementInstanceByID(ctx context.Context, i
 		&mi.Movement.ID,
 		&mi.Movement.Name,
 		&mi.Movement.MovementType,
-		&mi.Movement.Description,
 		&mi.Movement.CreatedAt,
 		&mi.Movement.UpdatedAt,
 	)
@@ -101,7 +100,7 @@ func (s *movementInstanceService) GetMovementInstanceByID(ctx context.Context, i
 func (s *movementInstanceService) GetAllMovementInstancesByWorkoutID(ctx context.Context, workoutID int) ([]*flexcreek.MovementInstance, error) {
 	qry := `
 		SELECT
-		mi.id, mi.workout_id, mi.notes, mi.rpe, mi.log_data, mi.created_at, mi.updated_at, m.id, m.name, m.movement_type, m.description, m.created_at, m.updated_at
+		mi.id, mi.workout_id, mi.notes, mi.rpe, mi.log_data, mi.created_at, mi.updated_at, m.id, m.name, m.movement_type, m.created_at, m.updated_at
 		FROM movement_instances mi
 		JOIN movements m ON mi.movement_id = m.id
 		WHERE mi.workout_id = ?	
@@ -128,7 +127,6 @@ func (s *movementInstanceService) GetAllMovementInstancesByWorkoutID(ctx context
 			&mi.Movement.ID,
 			&mi.Movement.Name,
 			&mi.Movement.MovementType,
-			&mi.Movement.Description,
 			&mi.Movement.CreatedAt,
 			&mi.Movement.UpdatedAt,
 		); err != nil {
@@ -150,7 +148,7 @@ func (s *movementInstanceService) GetAllMovementInstancesForMovement(ctx context
 	qry := `
 		SELECT
 			mi.id, mi.workout_id, mi.notes, mi.rpe, mi.log_data,
-			mi.created_at, mi.updated_at, m.id, m.name, m.movement_type, m.description, m.created_at, m.updated_at
+			mi.created_at, mi.updated_at, m.id, m.name, m.movement_type, m.created_at, m.updated_at
 		FROM movement_instances mi
 		JOIN workouts w ON mi.workout_id = w.id
 		JOIN movements m ON mi.movement_id = m.id
@@ -177,7 +175,6 @@ func (s *movementInstanceService) GetAllMovementInstancesForMovement(ctx context
 			&mi.Movement.ID,
 			&mi.Movement.Name,
 			&mi.Movement.MovementType,
-			&mi.Movement.Description,
 			&mi.Movement.CreatedAt,
 			&mi.Movement.UpdatedAt,
 		); err != nil {
@@ -199,7 +196,7 @@ func (s *movementInstanceService) GetAllMovementInstancesByUser(ctx context.Cont
 	qry := `
 		SELECT
 			mi.id, mi.workout_id, mi.notes, mi.rpe, mi.log_data,
-			mi.created_at, mi.updated_at, m.id, m.name, m.movement_type, m.description, m.created_at, m.updated_at
+			mi.created_at, mi.updated_at, m.id, m.name, m.movement_type, m.created_at, m.updated_at
 		FROM movement_instances mi
 		JOIN workouts w ON mi.workout_id = w.id
 		JOIN movements m ON mi.movement_id = m.id
@@ -224,7 +221,6 @@ func (s *movementInstanceService) GetAllMovementInstancesByUser(ctx context.Cont
 			&mi.Movement.ID,
 			&mi.Movement.Name,
 			&mi.Movement.MovementType,
-			&mi.Movement.Description,
 			&mi.Movement.CreatedAt,
 			&mi.Movement.UpdatedAt,
 		); err != nil {
