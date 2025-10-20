@@ -12,8 +12,9 @@ type MovementType string
 const (
 	StrengthMovement MovementType = "strength"
 	CardioMovement   MovementType = "cardio"
-	AmrapMovement    MovementType = "amrap" // As Many Rounds As Possible
-	EmomMovement     MovementType = "emom"  // Every Minute On the Minute
+	AmrapMovement    MovementType = "amrap"   // As Many Rounds As Possible
+	EmomMovement     MovementType = "emom"    // Every Minute On the Minute
+	ComplexMovement  MovementType = "complex" //e.g. for a kettlebell complex
 	// Add other types as needed, e.g., "flexibility", "tabata"
 )
 
