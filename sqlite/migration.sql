@@ -4,7 +4,7 @@ IF NOT EXISTS users
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
-    hashed_password TEXT NOT NULL,
+    hashed_password BLOB NOT NULL,
     created_at        TEXT DEFAULT
 (strftime
 ('%Y-%m-%d %H:%M:%S', 'now')),

@@ -9,13 +9,12 @@ import (
 var ErrInvalidCredentials = errors.New("invalid email or password")
 
 type User struct {
-	ID        int       `json:"id"`
-	FirstName string    `json:"firstName"`
-	LastName  string    `json:"lastName"`
-	Email     string    `json:"email"`
-	HashedPw  string    `json:"hashedPw"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID           int       `json:"id"`
+	UserName     string    `json:"username"`
+	Email        string    `json:"email"`
+	PasswordHash []byte    `json:"-"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
 }
 
 type UserService interface {
