@@ -43,42 +43,102 @@ func (us userService) CreateUser(ctx context.Context, u *flexcreek.User) (int, e
 }
 
 func (us userService) GetUserByID(ctx context.Context, id int) (*flexcreek.User, error) {
-	return nil, nil
+	qry := `
+	SELECT id,
+	username,
+	email,
+	hashed_password,
+	created_at,
+	updated_at
+	FROM users
+	WHERE id = ?
+	`
+
+	res, err := us.db.QueryContext(ctx, qry, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var u = &flexcreek.User{}
+
+	err = res.Scan(&u.ID, &u.UserName, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
 }
 
 func (us userService) GetUserByEmail(ctx context.Context, email string) (*flexcreek.User, error) {
-	return nil, nil
-}
+	qry := `
+	SELECT id,
+	username,
+	email,
+	hashed_password,
+	created_at,
+	updated_at
+	FROM users
+	WHERE email = ?
+	`
 
-func (us userService) GetAllUsers(ctx context.Context) ([]*flexcreek.User, error) {
-	return nil, nil
+	res, err := us.db.QueryContext(ctx, qry, email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var u = &flexcreek.User{}
+
+	err = res.Scan(&u.ID, &u.UserName, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
+
 }
 
 func (us userService) UpdateUser(ctx context.Context, u *flexcreek.User) error {
+	qry := `
+	UPDATE users
+	SET username = ?,
+	email = ?,
+	hashed_password = ?
+	WHERE id = ?
+	`
+
+	_, err := us.db.ExecContext(ctx, qry, u.UserName, u.Email, u.PasswordHash, u.ID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (us userService) DeleteUser(ctx context.Context, id int) error {
+	qry := `DELETE FROM users WHERE id = ?`
+	_, err := us.db.ExecContext(ctx, qry, id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (us userService) Login(ctx context.Context, email string, password string) (*flexcreek.User, error) {
-	return nil, nil
-}
-
-// utilities --------------
-
-func hashPW(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	user, err := us.GetUserByEmail(ctx, email)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to hash password: %w", err)
+		return nil, err
 	}
 
-	return string(bytes), nil
-
+	ok, err := checkPasswordHash(password, string(user.PasswordHash))
+	//RESUME HERE
 }
 
+// utility ---------
 func checkPasswordHash(password string, hash string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 
