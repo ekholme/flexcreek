@@ -7,4 +7,5 @@ VALUES
     ('AMRAP'),
     ('EMOM'),
     ('Row'),
-    ('Ski');
+    ('Ski'),
+    ('Other');

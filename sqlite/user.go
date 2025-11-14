@@ -54,15 +54,9 @@ func (us userService) GetUserByID(ctx context.Context, id int) (*flexcreek.User,
 	WHERE id = ?
 	`
 
-	res, err := us.db.QueryContext(ctx, qry, id)
-
-	if err != nil {
-		return nil, err
-	}
-
 	var u = &flexcreek.User{}
 
-	err = res.Scan(&u.ID, &u.UserName, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt)
+	err := us.db.QueryRowContext(ctx, qry, id).Scan(&u.ID, &u.UserName, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt)
 
 	if err != nil {
 		return nil, err
@@ -83,15 +77,9 @@ func (us userService) GetUserByEmail(ctx context.Context, email string) (*flexcr
 	WHERE email = ?
 	`
 
-	res, err := us.db.QueryContext(ctx, qry, email)
-
-	if err != nil {
-		return nil, err
-	}
-
 	var u = &flexcreek.User{}
 
-	err = res.Scan(&u.ID, &u.UserName, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt)
+	err := us.db.QueryRowContext(ctx, qry, email).Scan(&u.ID, &u.UserName, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt)
 
 	if err != nil {
 		return nil, err
@@ -131,11 +119,22 @@ func (us userService) Login(ctx context.Context, email string, password string) 
 	user, err := us.GetUserByEmail(ctx, email)
 
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, flexcreek.ErrInvalidCredentials
+		}
+		return nil, fmt.Errorf("login: %w", err)
 	}
 
 	ok, err := checkPasswordHash(password, string(user.PasswordHash))
-	//RESUME HERE
+	if err != nil {
+		return nil, fmt.Errorf("login: could not check password hash: %w", err)
+	}
+
+	if !ok {
+		return nil, flexcreek.ErrInvalidCredentials
+	}
+
+	return user, nil
 }
 
 // utility ---------
