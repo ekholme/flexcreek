@@ -21,7 +21,7 @@ func NewUserService(db *sql.DB) flexcreek.UserService {
 
 //methods ----------------
 
-func (us userService) CreateUser(ctx context.Context, u *flexcreek.User) (int, error) {
+func (us *userService) CreateUser(ctx context.Context, u *flexcreek.User) (int, error) {
 	qry := `
 	INSERT INTO users (username, email, hashed_password)
 	VALUES (?, ?, ?)
@@ -42,7 +42,7 @@ func (us userService) CreateUser(ctx context.Context, u *flexcreek.User) (int, e
 	return int(id), nil
 }
 
-func (us userService) GetUserByID(ctx context.Context, id int) (*flexcreek.User, error) {
+func (us *userService) GetUserByID(ctx context.Context, id int) (*flexcreek.User, error) {
 	qry := `
 	SELECT id,
 	username,
@@ -65,7 +65,7 @@ func (us userService) GetUserByID(ctx context.Context, id int) (*flexcreek.User,
 	return u, nil
 }
 
-func (us userService) GetUserByEmail(ctx context.Context, email string) (*flexcreek.User, error) {
+func (us *userService) GetUserByEmail(ctx context.Context, email string) (*flexcreek.User, error) {
 	qry := `
 	SELECT id,
 	username,
@@ -89,7 +89,7 @@ func (us userService) GetUserByEmail(ctx context.Context, email string) (*flexcr
 
 }
 
-func (us userService) UpdateUser(ctx context.Context, u *flexcreek.User) error {
+func (us *userService) UpdateUser(ctx context.Context, u *flexcreek.User) error {
 	qry := `
 	UPDATE users
 	SET username = ?,
@@ -106,7 +106,7 @@ func (us userService) UpdateUser(ctx context.Context, u *flexcreek.User) error {
 	return nil
 }
 
-func (us userService) DeleteUser(ctx context.Context, id int) error {
+func (us *userService) DeleteUser(ctx context.Context, id int) error {
 	qry := `DELETE FROM users WHERE id = ?`
 	_, err := us.db.ExecContext(ctx, qry, id)
 	if err != nil {
@@ -115,7 +115,7 @@ func (us userService) DeleteUser(ctx context.Context, id int) error {
 	return nil
 }
 
-func (us userService) Login(ctx context.Context, email string, password string) (*flexcreek.User, error) {
+func (us *userService) Login(ctx context.Context, email string, password string) (*flexcreek.User, error) {
 	user, err := us.GetUserByEmail(ctx, email)
 
 	if err != nil {
