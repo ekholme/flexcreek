@@ -30,8 +30,14 @@ type WorkoutService interface {
 	// Get the n latest workouts for a specific user
 	LatestWorkouts(ctx context.Context, userID, n int) ([]*Workout, error)
 	// Get all workouts for a specific user
-	GetWorkoutsForUser(ctx context.Context, userID int) ([]*Workout, error)
+	GetWorkoutsByUser(ctx context.Context, userID int) ([]*Workout, error)
 	GetWorkoutsByActivityType(ctx context.Context, userID int, activityTypeID int) ([]*Workout, error)
 	UpdateWorkout(ctx context.Context, w *Workout) error
 	DeleteWorkout(ctx context.Context, id int) error
+}
+
+type ActivityTypeService interface {
+	CreateActivityType(ctx context.Context, at *ActivityType) (int, error)
+	GetAllActivityTypes(ctx context.Context) ([]*ActivityType, error)
+	GetActivityTypeByID(ctx context.Context, id int) (*ActivityType, error)
 }

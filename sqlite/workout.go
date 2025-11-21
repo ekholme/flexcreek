@@ -84,26 +84,220 @@ func (ws *workoutService) GetWorkoutByID(ctx context.Context, id int) (*flexcree
 }
 
 func (ws *workoutService) LatestWorkouts(ctx context.Context, userID, n int) ([]*flexcreek.Workout, error) {
-	//todo
-	return nil, nil
+	qry := `
+	SELECT
+		w.id,
+		w.user_id,
+		w.duration_minutes,
+		w.distance_miles,
+		w.workout_details,
+		w.workout_date,
+		w.created_at,
+		w.updated_at,
+		w.activity_type_id,
+		a.id,
+		a.name
+	FROM
+		workouts w
+	JOIN
+		activity_types a ON w.activity_type_id = a.id
+	WHERE
+		w.user_id = ?
+	ORDER BY workout_date DESC
+	LIMIT ?;
+	`
+	rows, err := ws.db.QueryContext(ctx, qry, userID, n)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	workouts := make([]*flexcreek.Workout, 0, n)
+
+	for rows.Next() {
+		var w flexcreek.Workout
+
+		if err := rows.Scan(
+			&w.ID,
+			&w.UserID,
+			&w.DurationMins,
+			&w.DistanceMiles,
+			&w.WorkoutDetails,
+			&w.WorkoutDate,
+			&w.CreatedAt,
+			&w.UpdatedAt,
+			&w.ActivityTypeID,
+			&w.ActivityType.ID,
+			&w.ActivityType.Name,
+		); err != nil {
+			return nil, err
+		}
+
+		workouts = append(workouts, &w)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return workouts, nil
 }
 
-func (ws *workoutService) GetWorkoutsForUser(ctx context.Context, userID int) ([]*flexcreek.Workout, error) {
-	//todo
-	return nil, nil
+func (ws *workoutService) GetWorkoutsByUser(ctx context.Context, userID int) ([]*flexcreek.Workout, error) {
+	qry := `
+	SELECT
+		w.id,
+		w.user_id,
+		w.duration_minutes,
+		w.distance_miles,
+		w.workout_details,
+		w.workout_date,
+		w.created_at,
+		w.updated_at,
+		w.activity_type_id,
+		a.id,
+		a.name
+	FROM
+		workouts w
+	JOIN
+		activity_types a ON w.activity_type_id = a.id
+	WHERE
+		w.user_id = ?
+	`
+
+	rows, err := ws.db.QueryContext(ctx, qry, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	workouts := make([]*flexcreek.Workout, 0)
+
+	for rows.Next() {
+		var w flexcreek.Workout
+
+		if err := rows.Scan(
+			&w.ID,
+			&w.UserID,
+			&w.DurationMins,
+			&w.DistanceMiles,
+			&w.WorkoutDetails,
+			&w.WorkoutDate,
+			&w.CreatedAt,
+			&w.UpdatedAt,
+			&w.ActivityTypeID,
+			&w.ActivityType.ID,
+			&w.ActivityType.Name,
+		); err != nil {
+			return nil, err
+		}
+
+		workouts = append(workouts, &w)
+
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return workouts, nil
 }
 
 func (ws *workoutService) GetWorkoutsByActivityType(ctx context.Context, userID int, activityTypeID int) ([]*flexcreek.Workout, error) {
-	//todo
-	return nil, nil
+	qry := `
+	SELECT
+		w.id,
+		w.user_id,
+		w.duration_minutes,
+		w.distance_miles,
+		w.workout_details,
+		w.workout_date,
+		w.created_at,
+		w.updated_at,
+		w.activity_type_id,
+		a.id,
+		a.name
+	FROM
+		workouts w
+	JOIN
+		activity_types a ON w.activity_type_id = a.id
+	WHERE
+		w.user_id = ?
+		AND w.activity_type_id = ?
+	`
+
+	rows, err := ws.db.QueryContext(ctx, qry, userID, activityTypeID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	workouts := make([]*flexcreek.Workout, 0)
+
+	for rows.Next() {
+		var w flexcreek.Workout
+
+		if err := rows.Scan(
+			&w.ID,
+			&w.UserID,
+			&w.DurationMins,
+			&w.DistanceMiles,
+			&w.WorkoutDetails,
+			&w.WorkoutDate,
+			&w.CreatedAt,
+			&w.UpdatedAt,
+			&w.ActivityTypeID,
+			&w.ActivityType.ID,
+			&w.ActivityType.Name,
+		); err != nil {
+			return nil, err
+		}
+
+		workouts = append(workouts, &w)
+
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return workouts, nil
 }
 
 func (ws *workoutService) UpdateWorkout(ctx context.Context, w *flexcreek.Workout) error {
-	//todo
+	qry := `
+	UPDATE workouts
+	SET activity_type_id = ?,
+	duration_minutes = ?,
+	distance_miles = ?,
+	workout_details = ?,
+	workout_date = ?
+	WHERE id = ?
+	`
+
+	_, err := ws.db.ExecContext(ctx, qry, w.ActivityTypeID, w.DurationMins, w.DistanceMiles, w.WorkoutDetails, w.WorkoutDate, w.ID)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (ws *workoutService) DeleteWorkout(ctx context.Context, id int) error {
-	//todo
+	qry := `DELETE FROM workouts WHERE id = ?`
+
+	_, err := ws.db.ExecContext(ctx, qry, id)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -19,13 +19,19 @@ func NewUserService(db *sql.DB) flexcreek.UserService {
 	}
 }
 
-//methods ----------------
-
-func (us *userService) CreateUser(ctx context.Context, u *flexcreek.User) (int, error) {
+// methods ----------------
+func (us *userService) CreateUser(ctx context.Context, u *flexcreek.User, password string) (int, error) {
 	qry := `
 	INSERT INTO users (username, email, hashed_password)
 	VALUES (?, ?, ?)
 	`
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return 0, fmt.Errorf("could not hash password: %w", err)
+	}
+
+	u.PasswordHash = hashedPassword
 
 	res, err := us.db.ExecContext(ctx, qry, u.UserName, u.Email, u.PasswordHash)
 
