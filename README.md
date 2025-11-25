@@ -6,7 +6,7 @@ Flex Creek is a workout tracker. It's meant to serve as a workout log as well as
 
 Next steps should roughly be:
 
-1. Finish DB services
+1. Finish DB services (DONE)
 2. API endpoints
 3. HTML endpoints
 4. Authentication (including user registration & activation via email?)
