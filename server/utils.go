@@ -1,7 +1,9 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -29,4 +31,10 @@ func checkPasswordHash(password string, hash string) (bool, error) {
 	}
 
 	return false, fmt.Errorf("unexpected error during password comparision: %w", err)
+}
+
+func writeJSON(w http.ResponseWriter, statusCode int, v any) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(v)
 }
