@@ -4,15 +4,12 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/ekholme/flexcreek/server"
 	"github.com/ekholme/flexcreek/sqlite"
 )
 
 const (
-	logFilePath   = "logs/demo_log.json"
-	templatePaths = "templates/*.html"
-	dsn           = "./flexcreek.db"
-	addr          = ":8080"
+	logFilePath = "logs/demo_log.json"
+	dsn         = "./flexcreek.db"
 )
 
 func main() {
@@ -27,6 +24,4 @@ func main() {
 	workoutService := sqlite.NewWorkoutService(db)
 	activityTypeService := sqlite.NewActivityTypeService(db)
 
-	s := server.NewServer(addr, userService, workoutService, activityTypeService, templatePaths, logFilePath)
-	s.Run()
 }

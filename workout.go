@@ -6,17 +6,17 @@ import (
 )
 
 type Workout struct {
-	ID             int          `db:"id"`
-	UserID         int          `db:"user_id"`
-	ActivityType   ActivityType `db:"activity_type"` // This will be populated by a JOIN
-	DurationMins   float64      `db:"duration_minutes"`
-	DistanceMiles  float64      `db:"distance_miles"`
-	WorkoutDetails string       `db:"workout_details"`
-	WorkoutDate    time.Time    `db:"workout_date"`
-	CreatedAt      time.Time    `db:"created_at"`
-	UpdatedAt      time.Time    `db:"updated_at"`
-	// ActivityTypeID is useful for create/update operations without fetching the whole ActivityType object.
+	ID             int `db:"id"`
+	UserID         int `db:"user_id"`
 	ActivityTypeID int `db:"activity_type_id"`
+
+	ActivityName   string    `db:"activity_name"` // This will be populated by a JOIN
+	DurationMins   float64   `db:"duration_minutes"`
+	DistanceMiles  float64   `db:"distance_miles"`
+	WorkoutDetails string    `db:"workout_details"`
+	Notes          string    `db:"notes"`
+	WorkoutDate    time.Time `db:"workout_date"`
+	CreatedAt      time.Time `db:"created_at"`
 }
 
 type ActivityType struct {

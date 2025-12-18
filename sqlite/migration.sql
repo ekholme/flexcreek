@@ -3,12 +3,8 @@ IF NOT EXISTS users
 (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
-    email TEXT NOT NULL UNIQUE,
-    hashed_password BLOB NOT NULL,
+    weight REAL,
     created_at        TEXT DEFAULT
-(strftime
-('%Y-%m-%d %H:%M:%S', 'now')),
-    updated_at        TEXT DEFAULT
 (strftime
 ('%Y-%m-%d %H:%M:%S', 'now'))
 );
@@ -33,11 +29,9 @@ NOT NULL REFERENCES activity_types
     duration_minutes REAL,
     distance_miles REAL,
     workout_details TEXT,
+    notes TEXT,
     workout_date TEXT NOT NULL,
     created_at        TEXT DEFAULT
-(strftime
-('%Y-%m-%d %H:%M:%S', 'now')),
-    updated_at        TEXT DEFAULT
 (strftime
 ('%Y-%m-%d %H:%M:%S', 'now'))
 );
