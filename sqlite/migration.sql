@@ -3,7 +3,6 @@ IF NOT EXISTS users
 (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
-    weight REAL,
     created_at        TEXT DEFAULT
 (strftime
 ('%Y-%m-%d %H:%M:%S', 'now'))
@@ -35,28 +34,6 @@ NOT NULL REFERENCES activity_types
 (strftime
 ('%Y-%m-%d %H:%M:%S', 'now'))
 );
-
--- create update triggers to automatically update the updated_at time
--- this ensures that I don't need to handle the updating in my Go code
-CREATE TRIGGER update_workout_updated_at
-AFTER
-UPDATE ON workouts
-FOR EACH ROW
-WHEN NEW.updated_at = OLD.updated_at
--- Avoid recursive trigger calls
-BEGIN
-    UPDATE workouts SET updated_at = strftime('%Y-%m-%d %H:%M:%S', 'now') WHERE id = NEW.id;
-END;
-
-CREATE TRIGGER update_user_updated_at
-AFTER
-UPDATE ON users
-FOR EACH ROW
-WHEN NEW.updated_at = OLD.updated_at
--- Avoid recursive trigger calls
-BEGIN
-    UPDATE users SET updated_at = strftime('%Y-%m-%d %H:%M:%S', 'now') WHERE id = NEW.id;
-END;
 
 -- create indexes to speed up queries and joins
 CREATE INDEX idx_workouts_user_id ON workouts (user_id);
