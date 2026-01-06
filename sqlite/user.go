@@ -3,6 +3,8 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 
 	"github.com/ekholme/flexcreek"
 )
@@ -24,7 +26,7 @@ func (us *userService) CreateUser(ctx context.Context, username string) (int, er
 	VALUES (?)
 	`
 
-	res, err := us.db.ExecContext(ctx, username)
+	res, err := us.db.ExecContext(ctx, qry, username)
 	if err != nil {
 		return 0, err
 	}
@@ -46,9 +48,17 @@ func (us *userService) GetUserByUsername(ctx context.Context, username string) (
 	WHERE username = ?
 	`
 
-	res, err := us.db.QueryRowContext(ctx, qry, username)
+	var u *flexcreek.User
 
-	// RESUME HERE
+	err := us.db.QueryRowContext(ctx, qry, username).Scan(&u.ID, &u.Username, &u.CreatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("user with username %s not found", username)
+		}
+		return nil, err
+	}
+
+	return u, nil
 }
 
 func (us *userService) DeleteUser(ctx context.Context, id int) error {
