@@ -2,11 +2,8 @@ package flexcreek
 
 import (
 	"context"
-	"errors"
 	"time"
 )
-
-var ErrInvalidCredentials = errors.New("invalid email or password")
 
 type User struct {
 	ID        int       `db:"id"`
@@ -17,5 +14,6 @@ type User struct {
 type UserService interface {
 	CreateUser(ctx context.Context, username string) (int, error)
 	GetUserByUsername(ctx context.Context, username string) (*User, error)
+	GetAllUsernames(ctx context.Context) ([]string, error)
 	DeleteUser(ctx context.Context, id int) error
 }

@@ -20,6 +20,7 @@ func NewUserService(db *sql.DB) flexcreek.UserService {
 }
 
 // methods ----------------
+// create a new user in the database
 func (us *userService) CreateUser(ctx context.Context, username string) (int, error) {
 	qry := `
 	INSERT INTO users (username)
@@ -39,6 +40,7 @@ func (us *userService) CreateUser(ctx context.Context, username string) (int, er
 	return int(id), nil
 }
 
+// get a user from the database given a username
 func (us *userService) GetUserByUsername(ctx context.Context, username string) (*flexcreek.User, error) {
 	qry := `
 	SELECT id,
@@ -59,6 +61,29 @@ func (us *userService) GetUserByUsername(ctx context.Context, username string) (
 	}
 
 	return u, nil
+}
+
+// get all usernames in the database
+func (us *userService) GetAllUsernames(ctx context.Context) ([]string, error) {
+	qry := "SELECT username FROM users"
+
+	var ss []string
+
+	rows, err := us.db.QueryContext(ctx, qry)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var s string
+
+		rows.Scan(s)
+
+		ss = append(ss, s)
+	}
+	return nil, nil
 }
 
 func (us *userService) DeleteUser(ctx context.Context, id int) error {

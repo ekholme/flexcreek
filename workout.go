@@ -1,3 +1,5 @@
+// Package flexcreek provides struct and interface definitions used
+// throughout the application
 package flexcreek
 
 import (
