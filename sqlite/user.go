@@ -50,7 +50,7 @@ func (us *userService) GetUserByUsername(ctx context.Context, username string) (
 	WHERE username = ?
 	`
 
-	var u *flexcreek.User
+	var u flexcreek.User
 
 	err := us.db.QueryRowContext(ctx, qry, username).Scan(&u.ID, &u.Username, &u.CreatedAt)
 	if err != nil {
@@ -60,7 +60,29 @@ func (us *userService) GetUserByUsername(ctx context.Context, username string) (
 		return nil, err
 	}
 
-	return u, nil
+	return &u, nil
+}
+
+func (us *userService) GetUserById(ctx context.Context, id int) (*flexcreek.User, error) {
+	qry := `
+	SELECT id,
+	username,
+	created_at
+	FROM users
+	WHERE id = ?
+	`
+
+	var u flexcreek.User
+
+	err := us.db.QueryRowContext(ctx, qry, id).Scan(&u.ID, &u.Username, &u.CreatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("user with id %v not found", id)
+		}
+		return nil, err
+	}
+
+	return &u, nil
 }
 
 // get all usernames in the database
@@ -79,11 +101,15 @@ func (us *userService) GetAllUsernames(ctx context.Context) ([]string, error) {
 	for rows.Next() {
 		var s string
 
-		rows.Scan(s)
+		if err := rows.Scan(&s); err != nil {
+			return nil, err
+		}
 
 		ss = append(ss, s)
 	}
-	return nil, nil
+
+	// check for errors during iteration
+	return ss, rows.Err()
 }
 
 func (us *userService) DeleteUser(ctx context.Context, id int) error {

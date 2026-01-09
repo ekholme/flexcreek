@@ -46,12 +46,11 @@ func (ws *workoutService) GetWorkoutByID(ctx context.Context, id int) (*flexcree
 		w.duration_minutes,
 		w.distance_miles,
 		w.workout_details,
+		w.notes,
 		w.workout_date,
 		w.created_at,
-		w.updated_at,
 		w.activity_type_id,
-		a.id,
-		a.name
+		a.name as activity_name
 	FROM
 		workouts w
 	JOIN
@@ -68,12 +67,11 @@ func (ws *workoutService) GetWorkoutByID(ctx context.Context, id int) (*flexcree
 		&w.DurationMins,
 		&w.DistanceMiles,
 		&w.WorkoutDetails,
+		&w.Notes,
 		&w.WorkoutDate,
 		&w.CreatedAt,
-		&w.UpdatedAt,
 		&w.ActivityTypeID,
-		&w.ActivityType.ID,
-		&w.ActivityType.Name,
+		&w.ActivityName,
 	)
 
 	if err != nil {
@@ -91,12 +89,11 @@ func (ws *workoutService) LatestWorkouts(ctx context.Context, userID, n int) ([]
 		w.duration_minutes,
 		w.distance_miles,
 		w.workout_details,
+		w.notes,
 		w.workout_date,
 		w.created_at,
-		w.updated_at,
 		w.activity_type_id,
-		a.id,
-		a.name
+		a.name as activity_name
 	FROM
 		workouts w
 	JOIN
@@ -125,12 +122,11 @@ func (ws *workoutService) LatestWorkouts(ctx context.Context, userID, n int) ([]
 			&w.DurationMins,
 			&w.DistanceMiles,
 			&w.WorkoutDetails,
+			&w.Notes,
 			&w.WorkoutDate,
 			&w.CreatedAt,
-			&w.UpdatedAt,
 			&w.ActivityTypeID,
-			&w.ActivityType.ID,
-			&w.ActivityType.Name,
+			&w.ActivityName,
 		); err != nil {
 			return nil, err
 		}
@@ -153,12 +149,11 @@ func (ws *workoutService) GetWorkoutsByUser(ctx context.Context, userID int) ([]
 		w.duration_minutes,
 		w.distance_miles,
 		w.workout_details,
+		w.notes,
 		w.workout_date,
 		w.created_at,
-		w.updated_at,
 		w.activity_type_id,
-		a.id,
-		a.name
+		a.name as activity_name
 	FROM
 		workouts w
 	JOIN
@@ -186,12 +181,11 @@ func (ws *workoutService) GetWorkoutsByUser(ctx context.Context, userID int) ([]
 			&w.DurationMins,
 			&w.DistanceMiles,
 			&w.WorkoutDetails,
+			&w.Notes,
 			&w.WorkoutDate,
 			&w.CreatedAt,
-			&w.UpdatedAt,
 			&w.ActivityTypeID,
-			&w.ActivityType.ID,
-			&w.ActivityType.Name,
+			&w.ActivityName,
 		); err != nil {
 			return nil, err
 		}
@@ -215,12 +209,11 @@ func (ws *workoutService) GetWorkoutsByActivityType(ctx context.Context, userID 
 		w.duration_minutes,
 		w.distance_miles,
 		w.workout_details,
+		w.notes,
 		w.workout_date,
 		w.created_at,
-		w.updated_at,
 		w.activity_type_id,
-		a.id,
-		a.name
+		a.name as activity_name
 	FROM
 		workouts w
 	JOIN
@@ -249,12 +242,11 @@ func (ws *workoutService) GetWorkoutsByActivityType(ctx context.Context, userID 
 			&w.DurationMins,
 			&w.DistanceMiles,
 			&w.WorkoutDetails,
+			&w.Notes,
 			&w.WorkoutDate,
 			&w.CreatedAt,
-			&w.UpdatedAt,
 			&w.ActivityTypeID,
-			&w.ActivityType.ID,
-			&w.ActivityType.Name,
+			&w.ActivityName,
 		); err != nil {
 			return nil, err
 		}
@@ -268,26 +260,6 @@ func (ws *workoutService) GetWorkoutsByActivityType(ctx context.Context, userID 
 	}
 
 	return workouts, nil
-}
-
-func (ws *workoutService) UpdateWorkout(ctx context.Context, w *flexcreek.Workout) error {
-	qry := `
-	UPDATE workouts
-	SET activity_type_id = ?,
-	duration_minutes = ?,
-	distance_miles = ?,
-	workout_details = ?,
-	workout_date = ?
-	WHERE id = ?
-	`
-
-	_, err := ws.db.ExecContext(ctx, qry, w.ActivityTypeID, w.DurationMins, w.DistanceMiles, w.WorkoutDetails, w.WorkoutDate, w.ID)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (ws *workoutService) DeleteWorkout(ctx context.Context, id int) error {

@@ -34,7 +34,6 @@ type WorkoutService interface {
 	// Get all workouts for a specific user
 	GetWorkoutsByUser(ctx context.Context, userID int) ([]*Workout, error)
 	GetWorkoutsByActivityType(ctx context.Context, userID int, activityTypeID int) ([]*Workout, error)
-	UpdateWorkout(ctx context.Context, w *Workout) error
 	DeleteWorkout(ctx context.Context, id int) error
 }
 

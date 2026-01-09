@@ -21,7 +21,5 @@ func main() {
 	}
 
 	userService := sqlite.NewUserService(db)
-	workoutService := sqlite.NewWorkoutService(db)
-	activityTypeService := sqlite.NewActivityTypeService(db)
 
 }
