@@ -90,5 +90,3 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
 }
-
-//TODO -- BETTER UNDERSTAND WHAT'S HAPPENING HERE
