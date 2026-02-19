@@ -112,6 +112,34 @@ func (us *userService) GetAllUsernames(ctx context.Context) ([]string, error) {
 	return ss, rows.Err()
 }
 
+
+// get all users in the database
+func (us *userService) GetAllUsers(ctx context.Context) ([]flexcreek.User, error) {
+	qry := "SELECT id, username, created_at FROM users"
+
+	var users []flexcreek.User
+
+	rows, err := us.db.QueryContext(ctx, qry)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var u flexcreek.User
+
+		if err := rows.Scan(&u.ID, &u.Username, &u.CreatedAt); err != nil {
+			return nil, err
+		}
+
+		users = append(users, u)
+	}
+
+	// check for errors during iteration
+	return users, rows.Err()
+}
+
 func (us *userService) DeleteUser(ctx context.Context, id int) error {
 	qry := `DELETE FROM users WHERE id = ?`
 	_, err := us.db.ExecContext(ctx, qry, id)

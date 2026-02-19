@@ -3,9 +3,7 @@ IF NOT EXISTS users
 (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
-    created_at        TEXT DEFAULT
-(strftime
-('%Y-%m-%d %H:%M:%S', 'now'))
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE
@@ -30,9 +28,7 @@ NOT NULL REFERENCES activity_types
     workout_details TEXT,
     notes TEXT,
     workout_date TEXT NOT NULL,
-    created_at        TEXT DEFAULT
-(strftime
-('%Y-%m-%d %H:%M:%S', 'now'))
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- create indexes to speed up queries and joins

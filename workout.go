@@ -17,7 +17,7 @@ type Workout struct {
 	DistanceMiles  float64   `db:"distance_miles"`
 	WorkoutDetails string    `db:"workout_details"`
 	Notes          string    `db:"notes"`
-	WorkoutDate    time.Time `db:"workout_date"`
+	WorkoutDate    time.Time `db:"workout_date,omitempty"`
 	CreatedAt      time.Time `db:"created_at"`
 }
 

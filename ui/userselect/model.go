@@ -26,11 +26,13 @@ func (i item) Description() string { return "Select to log a workout" }
 func (i item) FilterValue() string { return i.user.Username }
 
 type Model struct {
-	list    list.Model
-	input   textinput.Model
-	state   state
-	service flexcreek.UserService
-	err     error
+	list         list.Model
+	input        textinput.Model
+	state        state
+	service      flexcreek.UserService
+	err          error
+	SelectedUser *flexcreek.User
+	Quitting     bool
 }
 
 func New(us flexcreek.UserService) Model {
@@ -42,37 +44,65 @@ func New(us flexcreek.UserService) Model {
 	ti.Placeholder = "New Username..."
 
 	return Model{
-		list:    l,
-		input:   ti,
-		service: us,
-		state:   browsing,
+		list:     l,
+		input:    ti,
+		service:  us,
+		state:    browsing,
+		Quitting: false,
 	}
 }
 
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Init() tea.Cmd {
+	return func() tea.Msg {
+		users, err := m.service.GetAllUsers(context.Background())
+		if err != nil {
+			return common.ErrMsg{Err: err}
+		}
+		return common.UsersMsg{Users: users}
+	}
+}
+
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
+	case common.UsersMsg:
+		var items []list.Item
+		for _, u := range msg.Users {
+			items = append(items, item{user: u})
+		}
+		m.list.SetItems(items)
+		return m, nil
+	case common.ErrMsg:
+		m.err = msg.Err
+		return m, nil
 	case tea.WindowSizeMsg:
 		m.list.SetSize(msg.Width, msg.Height)
 
 	case tea.KeyMsg:
+		if msg.String() == "ctrl+c" || msg.String() == "q" {
+			m.Quitting = true
+			return m, tea.Quit
+		}
 		if m.state == creating {
 			switch msg.String() {
 			case "enter":
 				username := m.input.Value()
-
-				//TODO HANDLE THESE ERRORS
-				id, _ := m.service.CreateUser(context.Background(), username)
-				user, _ := m.service.GetUserById(context.Background(), id)
-				return m, func() tea.Msg {
-					return common.UserSelectedMsg{User: *user}
+				_, err := m.service.CreateUser(context.Background(), username)
+				if err != nil {
+					m.err = err
+					return m, nil
 				}
+				m.state = browsing
+				m.input.SetValue("")
+				return m, m.Init()
 
 			case "esc":
 				m.state = browsing
 				return m, nil
 			}
+			m.input, cmd = m.input.Update(msg)
+			return m, cmd
 		}
 
 		switch msg.String() {
@@ -83,7 +113,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 		case "enter":
 			if i, ok := m.list.SelectedItem().(item); ok {
-				return m, func() tea.Msg { return common.UserSelectedMsg{User: i.user} }
+				m.SelectedUser = &i.user
+				m.Quitting = true
+				return m, tea.Quit
 			}
 		}
 	}
