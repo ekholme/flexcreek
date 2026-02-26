@@ -8,7 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/ekholme/flexcreek/sqlite"
-	"github.com/ekholme/flexcreek/ui/userselect"
+	"github.com/ekholme/flexcreek/ui"
 	_ "modernc.org/sqlite"
 )
 
@@ -34,20 +34,14 @@ func main() {
 	defer db.Close()
 
 	userService := sqlite.NewUserService(db)
+	workoutService := sqlite.NewWorkoutService(db)
 
-	userModel := userselect.New(userService)
+	m := ui.New(userService, workoutService)
 
-	p := tea.NewProgram(userModel, tea.WithAltScreen())
+	p := tea.NewProgram(m, tea.WithAltScreen())
 
-	m, err := p.Run()
-	if err != nil {
+	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
-	}
-
-	if m, ok := m.(userselect.Model); ok {
-		if m.SelectedUser != nil {
-			log.Printf("User %s selected.", m.SelectedUser.Username)
-		}
 	}
 
 	fmt.Println("\nFlexcreek exiting.")
