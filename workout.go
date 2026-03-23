@@ -16,9 +16,9 @@ type Workout struct {
 
 type WorkoutService interface {
 	CreateWorkout(ctx context.Context, w *Workout) (int, error)
-	GetWorkoutByID(ctx context.Context, id int) (*Workout, error)
-	GetWorkoutByDate(ctx context.Context, date time.Time) (*Workout, error)
-	GetLatestWorkouts(ctx context.Context, n int) ([]*Workout, error)
+	GetWorkoutByID(ctx context.Context, id int, userID int) (*Workout, error)
+	GetWorkoutByDate(ctx context.Context, date time.Time, userID int) (*Workout, error)
+	GetLatestWorkouts(ctx context.Context, n int, userID int) ([]*Workout, error)
 	UpdateWorkout(ctx context.Context, w *Workout) error
 	DeleteWorkout(ctx context.Context, id int) error
 }
