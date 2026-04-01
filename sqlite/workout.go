@@ -65,7 +65,27 @@ func (ws workoutService) GetWorkoutByID(ctx context.Context, id int, userID int)
 }
 
 func (ws workoutService) GetWorkoutByDate(ctx context.Context, date time.Time, userID int) (*flexcreek.Workout, error) {
-	return nil, nil
+	qry := `
+		SELECT id,
+		user_id,
+		short_description,
+		long_description,
+		workout_date,
+		created_at
+		FROM workouts
+		WHERE id = ?
+		  AND date = ?
+	`
+
+	formattedDate := date.Format("2026-04-01")
+
+	var w flexcreek.Workout
+
+	if err := ws.db.QueryRowContext(ctx, qry, formattedDate).Scan(&w.ID, &w.UserID, &w.ShortDescription, &w.LongDescription, &w.WorkoutDate, &w.CreatedAt); err != nil {
+		return nil, err
+	}
+
+	return &w, nil
 }
 
 func (ws workoutService) GetLatestWorkouts(ctx context.Context, n int, userID int) ([]*flexcreek.Workout, error) {
