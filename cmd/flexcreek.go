@@ -1,7 +1,24 @@
 package main
 
-import "fmt"
+import (
+	"database/sql"
+	"fmt"
+	"log"
+
+	_ "modernc.org/sqlite"
+)
+
+const (
+	dsn = "flexcreek.db"
+)
 
 func main() {
 	fmt.Println("Hello from flexcreek!")
+
+	db, err := sql.Open("sqlite", dsn)
+
+	if err != nil {
+		log.Fatalf("Couldn't open the database: %s", err)
+	}
+
 }
