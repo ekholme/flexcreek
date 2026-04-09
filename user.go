@@ -15,6 +15,6 @@ type UserService interface {
 	CreateUser(ctx context.Context, username string) (int, error)
 	GetUserByUsername(ctx context.Context, username string) (*User, error)
 	GetUserByID(ctx context.Context, id int) (*User, error)
-	GetAllUsernames(ctx context.Context) ([]string, error)
+	GetAllUsers(ctx context.Context) ([]*User, error)
 	DeleteUser(ctx context.Context, id int) error
 }

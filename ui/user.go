@@ -1,9 +1,11 @@
 package ui
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/charmbracelet/bubbles/list"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/ekholme/flexcreek"
 )
 
@@ -36,4 +38,41 @@ func (i userItem) Title() string       { return i.user.Username }
 func (i userItem) Description() string { return strconv.Itoa(i.user.ID) }
 func (i userItem) FilterValue() string { return i.user.Username }
 
-//RESUME HERE -- define message types for passing messages around internally
+// message types for internal communication
+type loadedUsersMsg []list.Item
+type errMsg error
+type UserSelectMsg struct {
+	User *flexcreek.User
+}
+
+//bubbletea requires models to satisfy an interface with Init(), Update(), and View() methods
+
+func loadUsers(m UserModel) tea.Msg {
+	ctx := context.Background()
+	users, err := m.ctx.UserSvc.GetAllUsers(ctx)
+
+	if err != nil {
+		return errMsg(err)
+	}
+
+	items := make([]list.Item, len(users))
+
+	for i, u := range users {
+		items[i] = userItem{user: u}
+	}
+
+	return loadedUsersMsg(items)
+}
+
+// RESUME HERE -- i should be able to return this, just need to parse out how
+func (m UserModel) Init() tea.Cmd {
+	return loadUsers()
+}
+
+func (m UserModel) Update(tea.Msg) (tea.Model, tea.Cmd) {
+	return nil, nil
+}
+
+func (m UserModel) View() string {
+	return m.list.View()
+}

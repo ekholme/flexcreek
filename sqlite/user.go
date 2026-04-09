@@ -82,9 +82,11 @@ func (us userService) GetUserByID(ctx context.Context, id int) (*flexcreek.User,
 
 }
 
-func (us userService) GetAllUsernames(ctx context.Context) ([]string, error) {
+func (us userService) GetAllUsers(ctx context.Context) ([]*flexcreek.User, error) {
 	qry := `
-		SELECT username
+		SELECT id,
+		username,
+		created_at
 		FROM users	
 	`
 
@@ -95,13 +97,13 @@ func (us userService) GetAllUsernames(ctx context.Context) ([]string, error) {
 
 	defer rows.Close()
 
-	var usernames []string
+	var users []*flexcreek.User
 	for rows.Next() {
-		var username string
-		if err := rows.Scan(&username); err != nil {
+		var user flexcreek.User
+		if err := rows.Scan(&user.ID, &user.Username, &user.CreatedAt); err != nil {
 			return nil, err
 		}
-		usernames = append(usernames, username)
+		users = append(users, &user)
 	}
 
 	//check for any errors that occur during iteration
@@ -109,7 +111,7 @@ func (us userService) GetAllUsernames(ctx context.Context) ([]string, error) {
 		return nil, err
 	}
 
-	return usernames, nil
+	return users, nil
 }
 
 func (us userService) DeleteUser(ctx context.Context, id int) error {
