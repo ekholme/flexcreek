@@ -7,24 +7,14 @@ import (
 	"github.com/ekholme/flexcreek"
 )
 
-type userService struct {
-	db *sql.DB
-}
-
-func NewUserService(db *sql.DB) flexcreek.UserService {
-	return userService{
-		db: db,
-	}
-}
-
 // Create a new user in the users table of the database
-func (us userService) CreateUser(ctx context.Context, username string) (int, error) {
+func (s *Storage) CreateUser(ctx context.Context, username string) (int, error) {
 	qry := `
 		INSERT INTO users (username)
 		VALUES (?)	
 	`
 
-	res, err := us.db.ExecContext(ctx, qry, username)
+	res, err := s.db.ExecContext(ctx, qry, username)
 
 	if err != nil {
 		return 0, err
@@ -39,7 +29,7 @@ func (us userService) CreateUser(ctx context.Context, username string) (int, err
 	return int(id), nil
 }
 
-func (us userService) GetUserByUsername(ctx context.Context, username string) (*flexcreek.User, error) {
+func (s *Storage) GetUserByUsername(ctx context.Context, username string) (*flexcreek.User, error) {
 	qry := `
 		SELECT id,
 		username,
@@ -50,7 +40,7 @@ func (us userService) GetUserByUsername(ctx context.Context, username string) (*
 
 	var u flexcreek.User
 
-	res := us.db.QueryRowContext(ctx, qry, username)
+	res := s.db.QueryRowContext(ctx, qry, username)
 
 	//todo later -- define a custom error type to handle cases where no rows are returned & return this instead
 	if err := res.Scan(&u.ID, &u.Username, &u.CreatedAt); err != nil {
@@ -60,7 +50,7 @@ func (us userService) GetUserByUsername(ctx context.Context, username string) (*
 	return &u, nil
 }
 
-func (us userService) GetUserByID(ctx context.Context, id int) (*flexcreek.User, error) {
+func (s *Storage) GetUserByID(ctx context.Context, id int) (*flexcreek.User, error) {
 	qry := `
 		SELECT id,
 		username,
@@ -71,7 +61,7 @@ func (us userService) GetUserByID(ctx context.Context, id int) (*flexcreek.User,
 
 	var u flexcreek.User
 
-	res := us.db.QueryRowContext(ctx, qry, id)
+	res := s.db.QueryRowContext(ctx, qry, id)
 
 	//todo later -- define a custom error type to handle cases where no rows are returned & return this instead
 	if err := res.Scan(&u.ID, &u.Username, &u.CreatedAt); err != nil {
@@ -82,7 +72,7 @@ func (us userService) GetUserByID(ctx context.Context, id int) (*flexcreek.User,
 
 }
 
-func (us userService) GetAllUsers(ctx context.Context) ([]*flexcreek.User, error) {
+func (s *Storage) GetAllUsers(ctx context.Context) ([]*flexcreek.User, error) {
 	qry := `
 		SELECT id,
 		username,
@@ -90,7 +80,7 @@ func (us userService) GetAllUsers(ctx context.Context) ([]*flexcreek.User, error
 		FROM users	
 	`
 
-	rows, err := us.db.QueryContext(ctx, qry)
+	rows, err := s.db.QueryContext(ctx, qry)
 	if err != nil {
 		return nil, err
 	}
@@ -114,13 +104,13 @@ func (us userService) GetAllUsers(ctx context.Context) ([]*flexcreek.User, error
 	return users, nil
 }
 
-func (us userService) DeleteUser(ctx context.Context, id int) error {
+func (s *Storage) DeleteUser(ctx context.Context, id int) error {
 	qry := `
 		DELETE FROM users
 		WHERE id = ?	
 	`
 
-	res, err := us.db.ExecContext(ctx, qry, id)
+	res, err := s.db.ExecContext(ctx, qry, id)
 	if err != nil {
 		return err
 	}

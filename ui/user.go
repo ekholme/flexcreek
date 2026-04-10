@@ -2,77 +2,112 @@ package ui
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/ekholme/flexcreek"
 )
 
-//handles all interactions with the user model
-
-type UserModel struct {
-	list   list.Model
-	ctx    *ProgramContext
-	err    error
-	loaded bool
+// defining interfaces that the user model currently requires
+// a bit overkill to break out into 3 single-method interfaces now, but whatever
+type UserProvider interface {
+	GetAllUsers(ctx context.Context) ([]*flexcreek.User, error)
 }
 
-func NewUserModel(ctx *ProgramContext) UserModel {
-	//returning an empty list that we'll populate later
+type UserCreator interface {
+	CreateUser(ctx context.Context, username string) (int, error)
+}
+
+type UserDeleter interface {
+	DeleteUser(ctx context.Context, id int) error
+}
+
+type UserStore interface {
+	UserProvider
+	UserCreator
+	UserDeleter
+}
+
+type UserModel struct {
+	store    UserStore
+	list     list.Model
+	loading  bool
+	err      error
+	selected *flexcreek.User
+}
+
+// constructor for usermodel
+func NewUserModel(s UserStore) UserModel {
 	l := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
 	l.Title = "Select a User"
 
 	return UserModel{
-		list: l,
-		ctx:  ctx,
+		store:   s,
+		list:    l,
+		loading: true,
 	}
 }
 
-// bubbletea's list component requires items to satisfy an interface, so I need to wrap my User struct in something that does this
+// a command to fetch users from the database
+// we wrap this in a team.Cmd to ensure it's non-blocking
+func fetchUsersCmd(s UserStore) tea.Cmd {
+	return func() tea.Msg {
+		ctx := context.Background()
+		users, err := s.GetAllUsers(ctx)
+		if err != nil {
+			return err
+		}
+
+		return usersLoadedMsg{users}
+	}
+}
+
+type usersLoadedMsg struct {
+	users []*flexcreek.User
+}
+
 type userItem struct {
-	user *flexcreek.User
+	flexcreek.User
 }
 
-func (i userItem) Title() string       { return i.user.Username }
-func (i userItem) Description() string { return strconv.Itoa(i.user.ID) }
-func (i userItem) FilterValue() string { return i.user.Username }
+func (i userItem) Title() string       { return i.Username }
+func (i userItem) Description() string { return "Select to view workouts" }
+func (i userItem) FilterValue() string { return i.Username }
 
-// message types for internal communication
-type loadedUsersMsg []list.Item
-type errMsg error
-type UserSelectMsg struct {
-	User *flexcreek.User
-}
+//bubbletea requires models to implement 3 methods -- Init(), Update(), and View()
 
-//bubbletea requires models to satisfy an interface with Init(), Update(), and View() methods
-
-func loadUsers(m UserModel) tea.Msg {
-	ctx := context.Background()
-	users, err := m.ctx.UserSvc.GetAllUsers(ctx)
-
-	if err != nil {
-		return errMsg(err)
-	}
-
-	items := make([]list.Item, len(users))
-
-	for i, u := range users {
-		items[i] = userItem{user: u}
-	}
-
-	return loadedUsersMsg(items)
-}
-
-// RESUME HERE -- i should be able to return this, just need to parse out how
 func (m UserModel) Init() tea.Cmd {
-	return loadUsers()
+	//todo
 }
 
-func (m UserModel) Update(tea.Msg) (tea.Model, tea.Cmd) {
-	return nil, nil
+func (m UserModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+
+	switch msg := msg.(type) {
+	case usersLoadedMsg:
+		m.loading = false
+		items := make([]list.Item, len(msg.users))
+		for i, u := range msg.users {
+			items[i] = userItem{*u}
+		}
+		m.list.SetItems(items)
+
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter":
+			if i, ok := m.list.SelectedItem().(userItem); ok {
+				m.selected = &i.User
+				return m, func() tea.Msg { return UserSelectedMsg{i.User} }
+			}
+		case "n":
+			// Logic to switch to a "Create User" form state
+		}
+	}
+
+	m.list, cmd = m.list.Update(msg)
+	return m, cmd
 }
 
 func (m UserModel) View() string {
-	return m.list.View()
+	//todo
 }

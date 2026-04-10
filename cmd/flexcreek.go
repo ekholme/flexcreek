@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/ekholme/flexcreek/sqlite"
 	_ "modernc.org/sqlite"
 )
 
@@ -20,5 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Couldn't open the database: %s", err)
 	}
+
+	storage := sqlite.NewStorage(db)
 
 }

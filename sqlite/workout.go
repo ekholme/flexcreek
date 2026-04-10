@@ -9,17 +9,7 @@ import (
 	"github.com/ekholme/flexcreek"
 )
 
-type workoutService struct {
-	db *sql.DB
-}
-
-func NewWorkoutService(db *sql.DB) flexcreek.WorkoutService {
-	return workoutService{
-		db: db,
-	}
-}
-
-func (ws workoutService) CreateWorkout(ctx context.Context, w *flexcreek.Workout) (int, error) {
+func (s *Storage) CreateWorkout(ctx context.Context, w *flexcreek.Workout) (int, error) {
 	qry := `
 		INSERT INTO workouts (
 			user_id,
@@ -30,7 +20,7 @@ func (ws workoutService) CreateWorkout(ctx context.Context, w *flexcreek.Workout
 		VALUES (?, ?, ?, ?)
 	`
 
-	res, err := ws.db.ExecContext(ctx, qry, w.UserID, w.ShortDescription, w.LongDescription, w.WorkoutDate)
+	res, err := s.db.ExecContext(ctx, qry, w.UserID, w.ShortDescription, w.LongDescription, w.WorkoutDate)
 	if err != nil {
 		return 0, err
 	}
@@ -43,7 +33,7 @@ func (ws workoutService) CreateWorkout(ctx context.Context, w *flexcreek.Workout
 	return int(id), nil
 }
 
-func (ws workoutService) GetWorkoutByID(ctx context.Context, id int, userID int) (*flexcreek.Workout, error) {
+func (s *Storage) GetWorkoutByID(ctx context.Context, id int, userID int) (*flexcreek.Workout, error) {
 	qry := `
 		SELECT id,
 		user_id,
@@ -58,14 +48,14 @@ func (ws workoutService) GetWorkoutByID(ctx context.Context, id int, userID int)
 
 	var w flexcreek.Workout
 
-	if err := ws.db.QueryRowContext(ctx, qry, id, userID).Scan(&w.ID, &w.UserID, &w.ShortDescription, &w.LongDescription, &w.WorkoutDate, &w.CreatedAt); err != nil {
+	if err := s.db.QueryRowContext(ctx, qry, id, userID).Scan(&w.ID, &w.UserID, &w.ShortDescription, &w.LongDescription, &w.WorkoutDate, &w.CreatedAt); err != nil {
 		return nil, err
 	}
 
 	return &w, nil
 }
 
-func (ws workoutService) GetWorkoutByDate(ctx context.Context, date time.Time, userID int) (*flexcreek.Workout, error) {
+func (s *Storage) GetWorkoutByDate(ctx context.Context, date time.Time, userID int) (*flexcreek.Workout, error) {
 	qry := `
 		SELECT id,
 		user_id,
@@ -82,14 +72,14 @@ func (ws workoutService) GetWorkoutByDate(ctx context.Context, date time.Time, u
 
 	var w flexcreek.Workout
 
-	if err := ws.db.QueryRowContext(ctx, qry, formattedDate).Scan(&w.ID, &w.UserID, &w.ShortDescription, &w.LongDescription, &w.WorkoutDate, &w.CreatedAt); err != nil {
+	if err := s.db.QueryRowContext(ctx, qry, formattedDate).Scan(&w.ID, &w.UserID, &w.ShortDescription, &w.LongDescription, &w.WorkoutDate, &w.CreatedAt); err != nil {
 		return nil, err
 	}
 
 	return &w, nil
 }
 
-func (ws workoutService) GetLatestWorkouts(ctx context.Context, n int, userID int) ([]*flexcreek.Workout, error) {
+func (s *Storage) GetLatestWorkouts(ctx context.Context, n int, userID int) ([]*flexcreek.Workout, error) {
 	qry := `
 		SELECT id,
 		user_id,
@@ -103,7 +93,7 @@ func (ws workoutService) GetLatestWorkouts(ctx context.Context, n int, userID in
 		LIMIT ?;
 	`
 
-	rows, err := ws.db.QueryContext(ctx, qry, userID, n)
+	rows, err := s.db.QueryContext(ctx, qry, userID, n)
 
 	if err != nil {
 		return nil, err
@@ -132,7 +122,7 @@ func (ws workoutService) GetLatestWorkouts(ctx context.Context, n int, userID in
 	return workouts, nil
 }
 
-func (ws workoutService) UpdateWorkout(ctx context.Context, w *flexcreek.Workout) error {
+func (s *Storage) UpdateWorkout(ctx context.Context, w *flexcreek.Workout) error {
 	qry := `
 		UPDATE workouts
 		SET short_description = ?,
@@ -142,7 +132,7 @@ func (ws workoutService) UpdateWorkout(ctx context.Context, w *flexcreek.Workout
 		  AND user_id = ?
 	`
 
-	res, err := ws.db.ExecContext(ctx, qry, w.ShortDescription, w.LongDescription, w.WorkoutDate, w.ID, w.UserID)
+	res, err := s.db.ExecContext(ctx, qry, w.ShortDescription, w.LongDescription, w.WorkoutDate, w.ID, w.UserID)
 
 	if err != nil {
 		return err
@@ -161,12 +151,12 @@ func (ws workoutService) UpdateWorkout(ctx context.Context, w *flexcreek.Workout
 	return nil
 }
 
-func (ws workoutService) DeleteWorkout(ctx context.Context, id int) error {
+func (s *Storage) DeleteWorkout(ctx context.Context, id int) error {
 	qry := `
 		DELETE FROM workouts WHERE id = ?	
 	`
 
-	res, err := ws.db.ExecContext(ctx, qry, id)
+	res, err := s.db.ExecContext(ctx, qry, id)
 
 	if err != nil {
 		return err
