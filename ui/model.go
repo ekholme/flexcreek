@@ -21,4 +21,6 @@ type RootModel struct {
 
 // constructor function
 func NewRootModel(s *sqlite.Storage) RootModel {
+	//TODO
+	return RootModel{}
 }

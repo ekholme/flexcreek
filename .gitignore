@@ -2,3 +2,6 @@
 *.db
 *.csv
 *.db-wal
+
+#executable
+bin/

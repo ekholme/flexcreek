@@ -77,12 +77,29 @@ func fetchUsersCmd(s UserStore) tea.Cmd {
 	}
 }
 
+// a command to create a new user
+func createUserCmd(s UserStore, username string) tea.Cmd {
+
+	return func() tea.Msg {
+		ctx := context.Background()
+		_, err := s.CreateUser(ctx, username)
+		if err != nil {
+			return err
+		}
+
+		return userCreatedMsg{}
+	}
+}
+
 type usersLoadedMsg struct {
 	users []*flexcreek.User
 }
 
 type userSelectedMsg struct {
 	user *flexcreek.User
+}
+
+type userCreatedMsg struct {
 }
 
 type userItem struct {
@@ -116,15 +133,24 @@ func (m UserModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.list.SetItems(items)
 
-	case tea.WindowSizeMsg:
-		h, v := msg.Width, msg.Height
-		m.list.SetSize(h, v)
+	case userCreatedMsg:
+		m.input.Blur()
+		m.input.Reset()
+		return m, fetchUsersCmd(m.store)
 
+	case tea.WindowSizeMsg:
 		switch m.state {
 		case stateList:
 			return m.updateList(msg)
 		case stateCreateUser:
-			return m.updateForm(msg) //TODO
+			return m.updateForm(msg)
+		}
+	default:
+		switch m.state {
+		case stateList:
+			return m.updateList(msg)
+		case stateCreateUser:
+			return m.updateForm(msg)
 		}
 	}
 	return m, cmd
@@ -175,5 +201,30 @@ func (m UserModel) updateList(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
+	return m, cmd
+}
+
+func (m UserModel) updateForm(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "esc":
+			m.state = stateList
+			m.input.Blur()
+			m.input.Reset()
+			return m, nil
+
+		case "enter":
+			username := m.input.Value()
+			if username != "" {
+				m.state = stateList
+				m.loading = true
+				return m, createUserCmd(m.store, username)
+			}
+		}
+	}
+	m.input, cmd = m.input.Update(msg)
 	return m, cmd
 }

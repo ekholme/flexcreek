@@ -22,4 +22,4 @@ NOT NULL,
 
 -- create indexes
 CREATE INDEX idx_workouts_user_id ON workouts(user_id);
-CREATE INDEX idx_workouts_date ON workouts(workoute_date);
+CREATE INDEX idx_workouts_date ON workouts(workout_date);
