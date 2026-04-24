@@ -3,6 +3,7 @@ package ui
 import (
 	"context"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -48,6 +49,17 @@ type UserModel struct {
 func NewUserModel(s UserStore) UserModel {
 	l := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
 	l.Title = "Select a User"
+
+	//add an entry in the help keybinds to create a new user
+	var createUserKey = key.NewBinding(
+		key.WithKeys("n"),
+		key.WithHelp("n", "new user"),
+	)
+	l.AdditionalShortHelpKeys = func() []key.Binding {
+		return []key.Binding{
+			createUserKey,
+		}
+	}
 
 	//text input stuff
 	ti := textinput.New()
@@ -179,6 +191,10 @@ func (m UserModel) View() string {
 
 // helper update functions for different views
 func (m UserModel) updateList(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if size, ok := msg.(tea.WindowSizeMsg); ok {
+		m.list.SetSize(size.Width, size.Height)
+	}
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		//prevents user selection if we're in a filtering state
