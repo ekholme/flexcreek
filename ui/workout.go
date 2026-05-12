@@ -117,4 +117,44 @@ type workoutItem struct {
 	flexcreek.Workout
 }
 
-//RESUME HERE
+func (i workoutItem) Title() string       { return i.ShortDescription }
+func (i workoutItem) Description() string { return i.WorkoutDate.Format("2006-01-02") }
+func (i workoutItem) FilterValue() string { return i.LongDescription }
+
+// bubbletea model requirements
+func (m WorkoutModel) Init() tea.Cmd {
+	return fetchLatestWorkoutsCmd(m.store, m.listLength, m.selectedUserID)
+}
+
+func (m WorkoutModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+
+	switch msg := msg.(type) {
+	case error:
+		m.loading = false
+		m.err = msg
+		return m, nil
+
+	case workoutsLoadedMsg:
+		m.loading = false
+		items := make([]list.Item, len(msg.workouts))
+		for i, w := range msg.workouts {
+			items[i] = workoutItem{*w}
+		}
+		m.list.SetItems(items)
+
+	case workoutCreatedMsg:
+		m.input.Blur()
+		m.input.Reset()
+		return m, fetchLatestWorkoutsCmd(m.store, m.listLength, m.selectedUserID)
+
+		//RESUME HERE
+	}
+
+	return nil, nil
+}
+
+func (m WorkoutModel) View() string {
+	//todo
+	return ""
+}
