@@ -38,14 +38,15 @@ type WorkoutStore interface {
 
 // handles all interactions with the workout model
 type WorkoutModel struct {
-	store          WorkoutStore
-	list           list.Model
-	input          textinput.Model
-	state          sessionState
-	loading        bool
-	err            error
-	selectedUserID int //i think this is the right way to handle this for now?
-	listLength     int
+	store           WorkoutStore
+	list            list.Model
+	input           textinput.Model
+	state           sessionState
+	loading         bool
+	err             error
+	selectedUserID  int //i think this is the right way to handle this for now?
+	listLength      int
+	selectedWorkout *flexcreek.Workout
 }
 
 func NewWorkoutModel(s WorkoutStore, userID int, listLength int) WorkoutModel {
@@ -110,6 +111,10 @@ type workoutsLoadedMsg struct {
 	workouts []*flexcreek.Workout
 }
 
+type workoutSelectedMsg struct {
+	workout *flexcreek.Workout
+}
+
 type workoutCreatedMsg struct {
 }
 
@@ -148,13 +153,78 @@ func (m WorkoutModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.input.Reset()
 		return m, fetchLatestWorkoutsCmd(m.store, m.listLength, m.selectedUserID)
 
-		//RESUME HERE
+	case tea.WindowSizeMsg:
+		switch m.state {
+		case stateWorkoutList:
+			return m.updateWorkoutList(msg)
+		case stateCreateWorkout:
+			return m.updateWorkoutForm(msg)
+		}
+
+	default:
+		switch m.state {
+		case stateWorkoutList:
+			return m.updateWorkoutList(msg)
+		case stateCreateWorkout:
+			return m.updateWorkoutForm(msg)
+		}
+
 	}
 
-	return nil, nil
+	return m, cmd
 }
 
 func (m WorkoutModel) View() string {
+	if m.err != nil {
+		return "Error: " + m.err.Error()
+	}
+
+	switch m.state {
+	case stateCreateWorkout:
+		return "\n Placeholder \n\n" +
+			m.input.View() +
+			"\n\n (esc to go back)"
+
+	default:
+		if m.loading {
+			return " Loading workouts..."
+		}
+
+		return "\n" + m.list.View()
+	}
+}
+
+// update helpers
+func (m WorkoutModel) updateWorkoutList(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if size, ok := msg.(tea.WindowSizeMsg); ok {
+		m.list.SetSize(size.Width, size.Height)
+	}
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		//prevents workout selection in a filtering state
+		if m.list.FilterState() == list.Filtering {
+			break
+		}
+		switch msg.String() {
+		case "n":
+			m.state = stateCreateWorkout
+			m.input.Focus()
+			return m, nil
+
+		case "enter":
+			if i, ok := m.list.SelectedItem().(workoutItem); ok {
+				m.selectedWorkout = &i.Workout
+				return m, func() tea.Msg { return workoutSelectedMsg{&i.Workout} }
+			}
+		}
+	}
+	var cmd tea.Cmd
+	m.list, cmd = m.list.Update(msg)
+	return m, cmd
+}
+
+func (m WorkoutModel) updateWorkoutForm(msg tea.Msg) (tea.Model, tea.Cmd) {
 	//todo
-	return ""
+	return nil, nil
 }

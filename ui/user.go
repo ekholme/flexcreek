@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	stateList sessionState = iota
+	stateUserList sessionState = iota
 	stateCreateUser
 )
 
@@ -70,7 +70,7 @@ func NewUserModel(s UserStore) UserModel {
 		store:   s,
 		list:    l,
 		input:   ti,
-		state:   stateList,
+		state:   stateUserList,
 		loading: true,
 	}
 }
@@ -152,17 +152,17 @@ func (m UserModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.WindowSizeMsg:
 		switch m.state {
-		case stateList:
-			return m.updateList(msg)
+		case stateUserList:
+			return m.updateUserList(msg)
 		case stateCreateUser:
-			return m.updateForm(msg)
+			return m.updateUserForm(msg)
 		}
 	default:
 		switch m.state {
-		case stateList:
-			return m.updateList(msg)
+		case stateUserList:
+			return m.updateUserList(msg)
 		case stateCreateUser:
-			return m.updateForm(msg)
+			return m.updateUserForm(msg)
 		}
 	}
 	return m, cmd
@@ -190,7 +190,7 @@ func (m UserModel) View() string {
 }
 
 // helper update functions for different views
-func (m UserModel) updateList(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m UserModel) updateUserList(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if size, ok := msg.(tea.WindowSizeMsg); ok {
 		m.list.SetSize(size.Width, size.Height)
 	}
@@ -220,14 +220,14 @@ func (m UserModel) updateList(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m UserModel) updateForm(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m UserModel) updateUserForm(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc":
-			m.state = stateList
+			m.state = stateUserList
 			m.input.Blur()
 			m.input.Reset()
 			return m, nil
@@ -235,7 +235,7 @@ func (m UserModel) updateForm(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			username := m.input.Value()
 			if username != "" {
-				m.state = stateList
+				m.state = stateUserList
 				m.loading = true
 				return m, createUserCmd(m.store, username)
 			}
