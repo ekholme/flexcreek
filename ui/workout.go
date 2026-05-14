@@ -308,3 +308,23 @@ func (m WorkoutModel) updateWorkoutForm(msg tea.Msg) (tea.Model, tea.Cmd) {
 //     cmd := m.updateInputs(msg)
 //     return m, cmd
 // }
+
+// and view suggestions
+// func (m Model) View() string {
+//     var b strings.Builder
+
+//     for i := range m.inputs {
+//         b.WriteString(m.inputs[i].View())
+//         if i < len(m.inputs)-1 {
+//             b.WriteRune('\n')
+//         }
+//     }
+
+//     button := "\n\n [ Submit ] "
+//     if m.focusIndex == len(m.inputs) {
+//         button = "\n\n > [ Submit ] "
+//     }
+//     b.WriteString(button)
+
+//     return b.String()
+// }
