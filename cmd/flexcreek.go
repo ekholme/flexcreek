@@ -13,7 +13,9 @@ import (
 )
 
 const (
-	dsn = "flexcreek.db"
+	dsn               = "flexcreek.db"
+	workoutListLength = 10
+	testingID         = 1
 )
 
 func main() {
@@ -27,8 +29,9 @@ func main() {
 	defer db.Close()
 
 	storage := sqlite.NewStorage(db)
-	userModel := ui.NewUserModel(storage)
-	p := tea.NewProgram(userModel)
+	// userModel := ui.NewUserModel(storage)
+	workoutModel := ui.NewWorkoutModel(storage, testingID, workoutListLength)
+	p := tea.NewProgram(workoutModel)
 
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Error: %v", err)
